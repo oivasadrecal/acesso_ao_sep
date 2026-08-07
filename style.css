@@ -1,0 +1,1413 @@
+/* Reset e Base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    color: #1e293b;
+    min-height: 100vh;
+    padding-bottom: 40px;
+}
+
+/* Header Principal */
+.app-header {
+    background: linear-gradient(135deg, #004070 0%, #005696 100%);
+    color: #ffffff;
+    padding: 16px 20px;
+    box-shadow: 0 4px 12px rgba(0, 86, 150, 0.2);
+    margin-bottom: 24px;
+}
+
+.header-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-brand img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    background: #ffffff;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.header-title h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.header-title p {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-link-btn {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.2s ease;
+}
+
+.nav-link-btn:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-color: #ffffff;
+}
+
+.admin-badge {
+    background-color: #f59e0b;
+    color: #0f172a;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Container Principal Layout Grid */
+.main-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+/* Container do Colaborador */
+.colaborador-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.colaborador-toolbar {
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.toolbar-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.toolbar-title {
+    font-weight: 700;
+    color: #005696;
+    font-size: 0.95rem;
+}
+
+.toolbar-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Portal / Hub Principal (index.html) */
+.portal-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.portal-welcome {
+    margin-bottom: 36px;
+}
+
+.portal-welcome h2 {
+    font-size: 1.6rem;
+    color: #005696;
+    margin-bottom: 8px;
+}
+
+.portal-welcome p {
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.portal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.portal-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 32px 24px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.portal-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0, 86, 150, 0.15);
+    border-color: #005696;
+}
+
+.portal-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    background: #f0f4f8;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #005696;
+}
+
+.portal-card h3 {
+    font-size: 1.25rem;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.portal-card p {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.portal-btn {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.portal-btn-primary {
+    background-color: #005696;
+    color: #ffffff;
+}
+
+.portal-card:hover .portal-btn-primary {
+    background-color: #004070;
+}
+
+.portal-btn-secondary {
+    background-color: #0f172a;
+    color: #ffffff;
+}
+
+.portal-card:hover .portal-btn-secondary {
+    background-color: #1e293b;
+}
+
+/* Abas de Navegação Mobile */
+.mobile-tabs {
+    display: none;
+    max-width: 1300px;
+    margin: 0 auto 16px auto;
+    padding: 0 16px;
+    gap: 8px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 14px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.tab-btn.active {
+    background-color: #005696;
+    color: #ffffff;
+    border-color: #005696;
+}
+
+/* Formulário do Administrador */
+.admin-panel {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.panel-header {
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+}
+
+.panel-header h2 {
+    font-size: 1.15rem;
+    color: #005696;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-box {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.highlight-box {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #005696;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group.span-2 {
+    grid-column: span 2;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea,
+.print-mode-select {
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #ffffff;
+}
+
+.print-mode-select {
+    font-weight: 600;
+    border-color: #005696;
+    color: #004070;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.print-mode-select:focus {
+    border-color: #005696;
+    box-shadow: 0 0 0 3px rgba(0, 86, 150, 0.15);
+}
+
+/* Matriz NR10 no Form */
+.admin-table-wrapper {
+    overflow-x: auto;
+    margin-top: 6px;
+}
+
+.admin-nr10-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    text-align: center;
+}
+
+.admin-nr10-table th, .admin-nr10-table td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 4px;
+}
+
+.admin-nr10-table th {
+    background-color: #e2e8f0;
+    color: #1e293b;
+}
+
+.admin-nr10-table td.desc {
+    text-align: left;
+    padding-left: 8px;
+    font-weight: 500;
+}
+
+/* Alertas */
+.reciclagem-alert {
+    background-color: #fff7ed;
+    border: 1px solid #fdba74;
+    border-left: 5px solid #ea580c;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.alert-header-row h4 {
+    font-size: 0.9rem;
+    color: #9a3412;
+}
+
+.alert-badge {
+    background-color: #c2410c;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.alert-content p {
+    font-size: 0.82rem;
+    color: #7c2d12;
+    line-height: 1.4;
+}
+
+/* Ações */
+.admin-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-validate {
+    background-color: #10b981;
+    color: #ffffff;
+    flex: 1;
+}
+
+.btn-validate:hover {
+    background-color: #059669;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.btn-print {
+    background-color: #005696;
+    color: #ffffff;
+}
+
+.btn-print:hover {
+    background-color: #004070;
+    box-shadow: 0 4px 10px rgba(0, 86, 150, 0.3);
+}
+
+.btn-reset {
+    background-color: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+.btn-reset:hover {
+    background-color: #e2e8f0;
+    color: #334155;
+}
+
+/* Container de Preview do Cartão */
+.preview-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.preview-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.status-indicator.valid {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-indicator.pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* ========================================================
+   ESTRUTURA DO MODELO DE CARTÃO 10cm x 6cm (FRENTE E VERSO)
+   ======================================================== */
+.printable-card-wrapper {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    width: fit-content;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Marcas de Corte nos Cantos */
+.crop-mark {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+}
+
+.crop-mark.top-left {
+    top: 2px;
+    left: 2px;
+    border-top: 2px solid #000;
+    border-left: 2px solid #000;
+}
+
+.crop-mark.top-right {
+    top: 2px;
+    right: 2px;
+    border-top: 2px solid #000;
+    border-right: 2px solid #000;
+}
+
+.crop-mark.bottom-left {
+    bottom: 2px;
+    left: 2px;
+    border-bottom: 2px solid #000;
+    border-left: 2px solid #000;
+}
+
+.crop-mark.bottom-right {
+    bottom: 2px;
+    right: 2px;
+    border-bottom: 2px solid #000;
+    border-right: 2px solid #000;
+}
+
+/* Lado do Cartão (DEFINIÇÃO EXATA CONFORME IMAGEM: 10 cm LARGURA x 6 cm ALTURA) */
+.sep-card-side {
+    width: 10cm;
+    height: 6cm;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    border: 1.5px solid #1e293b;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #0f172a;
+}
+
+/* --- CARTÃO FRENTE / CARD 1 (10cm x 6cm) --- */
+.card-front {
+    border: 1.5px solid #004070;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 6cm;
+    box-sizing: border-box;
+}
+
+.card-header {
+    background-color: #ffffff;
+    color: #0f172a;
+    padding: 2px 5px;
+    border-bottom: 1px solid #0f172a;
+    flex-shrink: 0;
+}
+
+.logo-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 1px;
+    margin-bottom: 1px;
+}
+
+.logo-img {
+    height: 24px; /* Aumentado conforme solicitado */
+    width: auto;
+    object-fit: contain;
+}
+
+.unidade {
+    font-size: 0.54rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    text-transform: uppercase;
+}
+
+.header-main-title {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: 0.2px;
+    color: #003366;
+    text-transform: uppercase;
+    line-height: 1.1;
+}
+
+.header-sub-title {
+    background-color: #f1f5f9;
+    font-size: 0.52rem;
+    font-weight: 700;
+    text-align: center;
+    color: #1e293b;
+    border: 1px solid #94a3b8;
+    margin-top: 1px;
+    padding: 0.5px 0;
+}
+
+.card-front-body {
+    padding: 2px 4px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+/* Grid de Informações do Colaborador */
+.top-info-grid {
+    display: grid;
+    grid-template-columns: 1.45fr 1fr; /* Proporção ajustada para garantir espaço completo para Data Emissão! */
+    border: 1px solid #000000;
+    font-size: 0.52rem;
+    background-color: #ffffff;
+}
+
+.info-cell {
+    padding: 1.5px 3px;
+    border-bottom: 1px solid #000000;
+    border-right: 1px solid #000000;
+    white-space: nowrap;
+    overflow: visible;
+}
+
+.cell-nome {
+    grid-column: span 1;
+}
+
+.cell-matr {
+    grid-column: span 1;
+    border-right: none;
+}
+
+.cell-funcao {
+    grid-column: span 1;
+    border-bottom: none;
+}
+
+.cell-data-emissao {
+    grid-column: span 1;
+    border-bottom: none;
+    border-right: none;
+    font-size: 0.51rem;
+}
+
+.info-cell .lbl {
+    font-weight: 600;
+    color: #334155;
+    margin-right: 2px;
+}
+
+.info-cell .val {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* TABELA NR 10 OFICIAL (COM TEXTO VERTICAL COMO NA IMAGEM) */
+.nr10-table-wrapper {
+    margin-top: 1px;
+}
+
+.tabela-nr10-oficial {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.48rem;
+    text-align: center;
+    table-layout: fixed;
+}
+
+.tabela-nr10-oficial th, 
+.tabela-nr10-oficial td {
+    border: 1px solid #000000 !important;
+    padding: 0.5px 1px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.tabela-nr10-oficial thead {
+    background-color: #f8fafc;
+}
+
+.th-abrangencia {
+    width: 48%;
+    font-size: 0.52rem;
+    font-weight: 800;
+    background-color: #f1f5f9;
+}
+
+.v-header-empty {
+    width: 12px;
+    background-color: #f8fafc;
+}
+
+.v-header {
+    width: 12px;
+    font-size: 0.44rem;
+    font-weight: 800;
+    background-color: #f8fafc;
+    padding: 0 !important;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.v-header span {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    display: inline-block;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    font-size: 0.44rem;
+}
+
+.th-sub {
+    width: 11.5%;
+    font-size: 0.52rem;
+    font-weight: 800;
+}
+
+.sub-hdr-desc th {
+    font-size: 0.42rem;
+    font-weight: 600;
+    background-color: #f8fafc;
+    line-height: 1.1;
+}
+
+.abrang-desc {
+    text-align: left;
+    padding-left: 3px !important;
+    font-size: 0.49rem;
+}
+
+.abrang-desc .num {
+    float: right;
+    font-weight: 700;
+    border: 1px solid #64748b;
+    padding: 0 2px;
+    border-radius: 2px;
+    font-size: 0.46rem;
+}
+
+.tabela-nr10-oficial td.marcado {
+    background-color: #e2e8f0;
+    color: #000000;
+    font-weight: 900;
+    font-size: 0.65rem;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.card-warning-footer {
+    font-size: 0.45rem;
+    text-align: center;
+    color: #0f172a;
+    font-weight: 600;
+    background-color: #f1f5f9;
+    border: 1px solid #000000;
+    margin-top: 1px;
+    padding: 0.5px;
+}
+
+.card-validade-row {
+    border-top: 1.5px solid #000000;
+    background-color: #ffffff;
+    padding: 2px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.6rem;
+    flex-shrink: 0;
+}
+
+.card-validade-row .lbl {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.card-validade-row .val {
+    font-weight: 900;
+    color: #000000;
+    font-size: 0.65rem;
+}
+
+/* --- LINHA GUIA DE DOBRA PARA POCKET --- */
+.fold-line-divider {
+    margin: 8px 0;
+    border-top: 1.5px dashed #94a3b8;
+    text-align: center;
+    position: relative;
+    width: 10cm;
+}
+
+.fold-label {
+    background-color: #ffffff;
+    color: #64748b;
+    padding: 0 8px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    position: relative;
+    top: -8px;
+    letter-spacing: 0.4px;
+}
+
+/* --- CARTÃO VERSO / CARD 2 (10cm x 6cm) --- */
+.card-back {
+    border: 1.5px solid #004070;
+}
+
+.card-back-content {
+    padding: 4px 6px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 0.52rem;
+}
+
+.tbl-nr1112, .tbl-nr33, .tbl-nr35 {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #000000;
+    margin-bottom: 2px;
+}
+
+.tbl-nr1112 td, .tbl-nr33 td, .tbl-nr35 td {
+    border: 1px solid #000000 !important;
+    padding: 2px 4px;
+}
+
+.lbl-nr {
+    width: 45px;
+    font-weight: 800;
+    font-size: 0.54rem;
+    background-color: #f1f5f9;
+    text-align: center;
+}
+
+.val-nr {
+    font-size: 0.52rem;
+}
+
+.desc-nr {
+    font-size: 0.5rem;
+}
+
+.atrib-hdr {
+    text-align: center;
+    font-weight: 700;
+    background-color: #f8fafc;
+    font-size: 0.48rem;
+}
+
+.atrib-row {
+    font-size: 0.48rem;
+    width: 70px;
+}
+
+.atrib-val {
+    font-weight: 800;
+    text-align: center;
+    width: 35px;
+}
+
+.val-nr35 {
+    font-weight: 800;
+    text-align: center;
+    width: 50px;
+}
+
+.val-lbl {
+    font-size: 0.48rem;
+    text-align: right;
+    font-weight: 600;
+}
+
+.val-date {
+    font-weight: 700;
+    text-align: center;
+}
+
+.card-obs-box {
+    border: 1px solid #000000;
+    padding: 2px 4px;
+    font-size: 0.47rem;
+    line-height: 1.25;
+    background-color: #ffffff;
+    margin-bottom: 2px;
+}
+
+.card-obs-box strong {
+    font-weight: 800;
+}
+
+.card-validity-notice {
+    font-size: 0.47rem;
+    font-weight: 700;
+    text-align: center;
+    color: #0f172a;
+    border-top: 1px dashed #94a3b8;
+    border-bottom: 1px dashed #94a3b8;
+    padding: 1px 0;
+    margin-bottom: 2px;
+}
+
+/* Assinaturas no Verso */
+.card-signatures {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.sig-box {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sig-image {
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sig-line {
+    width: 100%;
+    border-top: 1px solid #000;
+    margin: 1px 0;
+}
+
+.sig-box span {
+    font-size: 0.46rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* ========================================================
+   SEÇÃO DE PLANILHA DE CONTROLE (EXCEL / CSV) NO ADMIN
+   ======================================================== */
+.excel-section-box {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.excel-box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #dcfce7;
+    padding-bottom: 10px;
+}
+
+.excel-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.excel-icon {
+    font-size: 1.8rem;
+}
+
+.excel-title-group h3 {
+    font-size: 1rem;
+    color: #166534;
+    margin-bottom: 2px;
+}
+
+.excel-subtitle {
+    font-size: 0.78rem;
+    color: #15803d;
+}
+
+.excel-path-badge {
+    background-color: #dcfce7;
+    border: 1px solid #86efac;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: #14532d;
+    font-weight: 600;
+}
+
+.excel-actions-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.btn-xlsx {
+    background-color: #166534;
+    color: #ffffff;
+    flex: 1;
+}
+
+.btn-xlsx:hover {
+    background-color: #14532d;
+    box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+}
+
+.btn-csv {
+    background-color: #0284c7;
+    color: #ffffff;
+    flex: 1;
+}
+
+.btn-csv:hover {
+    background-color: #0369a1;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.excel-history-wrapper h4 {
+    font-size: 0.82rem;
+    color: #166534;
+    margin-bottom: 6px;
+}
+
+.excel-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    background-color: #ffffff;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+}
+
+.excel-history-table th, 
+.excel-history-table td {
+    padding: 6px 8px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.excel-history-table th {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+}
+
+.excel-history-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* MODOS DE EXIBIÇÃO DE IMPRESSÃO (POCKET, PVC LADO A LADO) */
+[data-print-mode="pvc"] .fold-line-divider {
+    display: none;
+}
+
+/* RESPONSIVIDADE (Mobile & Tablet) */
+@media (max-width: 992px) {
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+
+    .preview-panel {
+        position: static;
+    }
+
+    .mobile-tabs {
+        display: flex;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+}
+
+@media (max-width: 580px) {
+    body {
+        padding: 0 0 20px 0;
+    }
+
+    .app-header {
+        padding: 12px 16px;
+        margin-bottom: 16px;
+    }
+
+    .header-title h1 {
+        font-size: 1.05rem;
+    }
+
+    .main-container {
+        padding: 0 10px;
+    }
+
+    .admin-panel {
+        padding: 14px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.span-2 {
+        grid-column: span 1;
+    }
+
+    .printable-card-wrapper {
+        padding: 6px;
+    }
+
+    .sep-card-side {
+        max-width: 100%;
+    }
+
+    .assinaturas {
+        gap: 8px;
+    }
+
+    /* PVC grid columns override not needed on mobile screen as display is block */
+}
+
+/* Estilos para Alertas de Vencimento na Área do Colaborador */
+.expiration-alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.alert-item-card {
+    background-color: #ffffff;
+    border: 1px solid #fee2e2;
+    border-left: 4px solid #ef4444;
+    border-radius: 6px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.alert-item-header {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+.alert-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.alert-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.alert-tag.expired {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fee2e2;
+}
+
+.alert-tag.warning {
+    background-color: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #ffedd5;
+}
+
+.empty-alerts {
+    font-size: 0.85rem;
+    color: #166534;
+    text-align: center;
+    padding: 10px;
+    font-weight: 600;
+}
+
+/* Aumentar tamanho da pré-visualização do cartão na tela em 20% */
+@media screen {
+    .preview-panel .printable-card-wrapper {
+        transform: scale(1.2);
+        transform-origin: top center;
+        margin-bottom: 80px; /* Compensar o espaço extra ocupado pela escala */
+    }
+}
+
+/* ========================================================
+   ESTILOS DE IMPRESSÃO DE ALTA DEFINIÇÃO (EXATO 10cm x 6cm)
+   ======================================================== */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+
+    @page landscape-page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
+
+    body[data-print-mode="pvc"] {
+        page: landscape-page;
+    }
+
+    html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Ocultar elementos desnecessários de UI na impressão */
+    .app-header, 
+    .mobile-tabs, 
+    .admin-panel, 
+    .colaborador-panel,
+    .preview-title, 
+    .admin-actions,
+    .colaborador-toolbar,
+    .nav-link-btn,
+    .excel-section-box {
+        display: none !important;
+    }
+
+    /* Garantir que o painel de preview sempre apareça no Admin e no Colaborador */
+    .tab-content,
+    .preview-panel {
+        display: block !important;
+        position: static !important;
+        visibility: visible !important;
+        width: 100% !important;
+    }
+
+    .main-container, .colaborador-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* Cartão Impresso Centralizado com dimensões exatas de 10cm x 6cm */
+    .printable-card-wrapper {
+        border: none !important;
+        box-shadow: none !important;
+        margin: 10mm auto !important;
+        padding: 0 !important;
+        width: 10cm !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        background-color: #ffffff !important;
+        transform: none !important;
+    }
+
+    [data-print-mode="pvc"] .printable-card-wrapper {
+        display: grid !important;
+        grid-template-columns: 10cm 10cm !important;
+        gap: 12px !important;
+        width: calc(20cm + 12px) !important;
+    }
+
+    .sep-card-side {
+        width: 10cm !important;
+        height: 6cm !important;
+        border: 1.5px solid #000000 !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+        background-color: #ffffff !important;
+        margin: 0 auto !important;
+    }
+
+    /* Cabeçalhos do cartão impresso: fundo branco normal e linhas pretas nítidas */
+    .card-header {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-bottom: 1.5px solid #000000 !important;
+    }
+
+    .header-main-title {
+        color: #000000 !important;
+    }
+
+    .header-sub-title {
+        background-color: #f1f5f9 !important;
+        color: #000000 !important;
+        border: 1px solid #000000 !important;
+    }
+
+    .card-back-header {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-bottom: 1.5px solid #000000 !important;
+    }
+
+    .tabela-nr10-oficial th,
+    .tabela-nr10-oficial td,
+    .tbl-nr1112 td,
+    .tbl-nr33 td,
+    .tbl-nr35 td {
+        border: 1px solid #000000 !important;
+    }
+
+    .marcado {
+        background-color: #e2e8f0 !important;
+        color: #000000 !important;
+        font-weight: bold !important;
+    }
+
+    .crop-mark {
+        border-color: #000000 !important;
+    }
+
+    .fold-line-divider {
+        border-top-color: #000000 !important;
+        width: 10cm !important;
+    }
+}

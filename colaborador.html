@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartão do Colaborador - Autorização de Trabalho e Acesso SEP (10x6 cm)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="print-wrapper" class="colaborador-body" data-print-mode="pocket">
+
+    <!-- CABEÇALHO DA PÁGINA DO COLABORADOR -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="header-brand">
+                <img src="imagens/light.png" alt="Light Logo">
+                <div class="header-title">
+                    <h1>Cartão do Colaborador</h1>
+                    <p>Autorização de Trabalho e Acesso - SEP (10 cm x 6 cm)</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="admin.html" class="nav-link-btn">
+                    <span>⚙️</span> Área do Administrador
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL: EXIBIÇÃO DO CARTÃO DO COLABORADOR -->
+    <main class="colaborador-container">
+        
+        <!-- BARRA DE FERRAMENTAS DO COLABORADOR -->
+        <div class="colaborador-toolbar">
+            <div class="toolbar-info">
+                <span class="toolbar-title">🪪 Consulta de Cartão SEP</span>
+                <span class="toolbar-desc">Digite sua matrícula para carregar e imprimir seu cartão SEP.</span>
+            </div>
+            <div class="toolbar-actions" style="flex-wrap: wrap; gap: 8px;">
+                <div class="search-group" style="display: flex; gap: 6px; align-items: center; margin-right: 12px;">
+                    <input type="text" id="colaborador-search-matricula" class="print-mode-select" style="font-weight: normal; border-color: #cbd5e1; width: 140px;" placeholder="Sua matrícula">
+                    <button id="btn-colaborador-search" class="btn btn-print" style="padding: 6px 12px; font-size: 0.8rem; background-color: #005696; height: 35px;">
+                        <span>🔍</span> Consultar
+                    </button>
+                </div>
+                <select id="select-print-mode" class="print-mode-select">
+                    <option value="pocket">🪪 Modelo Dobrável (10x6 cm)</option>
+                    <option value="pvc">💳 Modelo Lado a Lado (10x6 cm)</option>
+                    <option value="a4">📑 Folha A4 Grade (4 Cartões)</option>
+                </select>
+                <button id="btn-colaborador-print" class="btn btn-print">
+                    <span>🖨️</span> Imprimir Cartão
+                </button>
+            </div>
+        </div>
+
+        <!-- EMBALAGEM DE IMPRESSÃO / MODELO COMPLETO (10x6cm cada lado) -->
+        <div class="printable-card-wrapper">
+            
+            <!-- MARCAS DE CORTE DE IMPRESSÃO SUPERIOR -->
+            <div class="crop-mark top-left"></div>
+            <div class="crop-mark top-right"></div>
+
+            <!-- CARTÃO FRENTE / CARD 1 (10cm x 6cm) -->
+            <div class="sep-card-side card-front">
+                <div class="card-header">
+                    <div class="logo-area">
+                        <img src="imagens/light.png" alt="Light" class="logo-img">
+                        <span class="unidade card-unidade">GERÊNCIA REGIONAL BAIXADA - OTNB</span>
+                    </div>
+                    <div class="header-main-title">AUTORIZAÇÃO DE TRABALHO E ACESSO</div>
+                    <div class="header-sub-title">NR 10 - Segurança em Instalações e Serviços em Eletricidade</div>
+                </div>
+
+                <div class="card-front-body">
+                    <div class="top-info-grid">
+                        <div class="info-cell cell-nome">
+                            <span class="lbl">Nome:</span>
+                            <strong class="val card-nome"></strong>
+                        </div>
+                        <div class="info-cell cell-matr">
+                            <span class="lbl">Matr.:</span>
+                            <strong class="val card-matricula"></strong>
+                        </div>
+                        <div class="info-cell cell-funcao">
+                            <span class="lbl">Função:</span>
+                            <strong class="val card-funcao">Eletricista de rede aérea</strong>
+                        </div>
+                        <div class="info-cell cell-data-emissao">
+                            <span class="lbl">Data emissão:</span>
+                            <strong class="val card-data-emissao">06/07/2026</strong>
+                        </div>
+                    </div>
+
+                    <!-- TABELA NR 10 INTEGRADA CONFORME FOTO -->
+                    <div class="nr10-table-wrapper">
+                        <table class="tabela-nr10-oficial">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="th-abrangencia">ABRANGÊNCIA</th>
+                                    <th rowspan="2" class="v-header-empty"></th>
+                                    <th class="th-sub">BTS</th>
+                                    <th class="th-sub">BTC</th>
+                                    <th rowspan="2" class="v-header-empty"></th>
+                                    <th class="th-sub">ATS</th>
+                                    <th class="th-sub">ATC</th>
+                                </tr>
+                                <tr class="sub-hdr-desc">
+                                    <th>Sem Tensão</th>
+                                    <th>Com Tensão</th>
+                                    <th>Sem Tensão</th>
+                                    <th>Com Tensão</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="abrang-desc">Sem Intervenção Elétrica <span class="num">0</span></td>
+                                    <td rowspan="5" class="v-header v-header-bt"><span>BAIXA TENSÃO</span></td>
+                                    <td class="card-nr10-r0-bts"></td>
+                                    <td class="card-nr10-r0-btc"></td>
+                                    <td rowspan="5" class="v-header v-header-at"><span>ALTA TENSÃO</span></td>
+                                    <td class="card-nr10-r0-ats"></td>
+                                    <td class="card-nr10-r0-atc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="abrang-desc">Com Intervenção Elétrica <span class="num">1</span></td>
+                                    <td class="card-nr10-r1-bts"></td>
+                                    <td class="card-nr10-r1-btc"></td>
+                                    <td class="card-nr10-r1-ats"></td>
+                                    <td class="card-nr10-r1-atc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="abrang-desc">Responsável de Trabalho <span class="num">2</span></td>
+                                    <td class="card-nr10-r2-bts marcado">X</td>
+                                    <td class="card-nr10-r2-btc marcado">X</td>
+                                    <td class="card-nr10-r2-ats marcado">X</td>
+                                    <td class="card-nr10-r2-atc marcado">X</td>
+                                </tr>
+                                <tr>
+                                    <td class="abrang-desc">Responsável Impedimento <span class="num">3</span></td>
+                                    <td class="card-nr10-r3-bts"></td>
+                                    <td class="card-nr10-r3-btc"></td>
+                                    <td class="card-nr10-r3-ats"></td>
+                                    <td class="card-nr10-r3-atc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="abrang-desc">Em Zona Livre <span class="num">4</span></td>
+                                    <td class="card-nr10-r4-bts"></td>
+                                    <td class="card-nr10-r4-btc"></td>
+                                    <td class="card-nr10-r4-ats"></td>
+                                    <td class="card-nr10-r4-atc"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-warning-footer">
+                        Abrangências 1, 2, 3, não permitem trabalhar sozinho em intervenção elétrica
+                    </div>
+                </div>
+
+                <div class="card-validade-row">
+                    <span class="lbl">Validade:</span>
+                    <strong class="val card-validade-cartao">28/05/2028</strong>
+                </div>
+            </div>
+
+            <!-- LINHA GUIA DE DOBRA PARA POCKET -->
+            <div class="fold-line-divider">
+                <span class="fold-label">✂️ DOBRE AQUI (LINHA CENTRAL DO CARTÃO 10x6cm) ✂️</span>
+            </div>
+
+            <!-- CARTÃO VERSO / CARD 2 (10cm x 6cm) -->
+            <div class="sep-card-side card-back">
+                <div class="card-back-content">
+                    <!-- NR 11/12 -->
+                    <table class="tbl-nr1112">
+                        <tr>
+                            <td class="lbl-nr">NR 11/12</td>
+                            <td class="val-nr">Autorizado a Operar: <strong class="card-autorizado-operar">CESTO AÉREO</strong></td>
+                        </tr>
+                    </table>
+
+                    <!-- NR 33 -->
+                    <table class="tbl-nr33">
+                        <tr>
+                            <td rowspan="3" class="lbl-nr">NR 33</td>
+                            <td rowspan="3" class="desc-nr">Autorização a Trabalhar em Espaço Confinado</td>
+                            <td colspan="2" class="atrib-hdr">Atribuição</td>
+                        </tr>
+                        <tr>
+                            <td class="atrib-row">Vigia</td>
+                            <td class="atrib-val card-nr33-vigia">NÃO</td>
+                        </tr>
+                        <tr>
+                            <td class="atrib-row">Supervisor Entrad</td>
+                            <td class="atrib-val card-nr33-supervisor">NÃO</td>
+                        </tr>
+                    </table>
+
+                    <!-- NR 35 -->
+                    <table class="tbl-nr35">
+                        <tr>
+                            <td rowspan="2" class="lbl-nr">NR 35</td>
+                            <td class="desc-nr">Trabalho em Altura</td>
+                            <td class="val-nr35 card-nr35-autorizado">SIM</td>
+                        </tr>
+                        <tr>
+                            <td class="val-lbl">Validade:</td>
+                            <td class="val-date card-nr35-validade">27/05/28</td>
+                        </tr>
+                    </table>
+
+                    <!-- OBSERVAÇÕES -->
+                    <div class="card-obs-box">
+                        <strong>OBSERVAÇÕES:</strong> <span class="card-observacoes">Capacitado a realizar atividades de emergência Rede Aérea. E Manobras de rede aérea de MT. Reparo de rede de BT/MT. Leitura de Medidores</span>
+                    </div>
+
+                    <div class="card-validity-notice">
+                        Só terá validade mediante o crachá de acesso e identificação funcional.
+                    </div>
+
+                    <!-- ASSINATURAS -->
+                    <div class="card-signatures">
+                        <div class="sig-box">
+                            <div class="sig-image employee-sig"></div>
+                            <div class="sig-line"></div>
+                            <span>Assinatura do Empregado</span>
+                        </div>
+                        <div class="sig-box">
+                            <div class="sig-image tech-resp-sig"></div>
+                            <div class="sig-line"></div>
+                            <span class="card-resp-tecnico-label">Assinatura do Responsável Técnico</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MARCAS DE CORTE DE IMPRESSÃO INFERIOR -->
+            <div class="crop-mark bottom-left"></div>
+            <div class="crop-mark bottom-right"></div>
+
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

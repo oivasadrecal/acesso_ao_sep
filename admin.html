@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrador - Autorização de Trabalho e Acesso SEP</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Biblioteca SheetJS para manipulação e download de arquivos XLSX/CSV nativos -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body id="print-wrapper" data-print-mode="pocket">
+
+    <!-- CABEÇALHO DA APLICAÇÃO -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="header-brand">
+                <img src="imagens/light.png" alt="Light">
+                <div class="header-title">
+                    <h1>Módulo do Administrador</h1>
+                    <p>Validação de Cadastro e Emissão de Crachá SEP (10cm x 6cm)</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="colaborador.html" class="nav-link-btn">
+                    <span>🪪</span> Ver Cartão do Colaborador
+                </a>
+                <span class="admin-badge">Painel Admin</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGAÇÃO DE ABAS PARA SMARTPHONE/MOBILE -->
+    <div class="mobile-tabs">
+        <button id="btn-tab-form" class="tab-btn active">
+            <span>✏️</span> Preencher Dados
+        </button>
+        <button id="btn-tab-preview" class="tab-btn">
+            <span>🪪</span> Visualizar Cartão
+        </button>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL (LAYOUT 2 COLUNAS / RESPONSIVO) -->
+    <main class="main-container">
+        
+        <!-- PAINEL DE FORMULÁRIO DO ADMINISTRADOR -->
+        <section id="tab-form" class="tab-content active admin-panel">
+            <div class="panel-header">
+                <h2><span>📝</span> Formulário do Colaborador</h2>
+            </div>
+
+            <!-- ALERTA DE RECICLAGEM (EXIBIDO QUANDO FALTAR <= 30 DIAS PARA VENCER) -->
+            <div id="reciclagem-alert" class="reciclagem-alert" style="display: none;">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <div class="alert-header-row">
+                        <h4>Aviso de Vencimento do Cartão</h4>
+                        <span id="alert-days-badge" class="alert-badge">Faltam 15 dias</span>
+                    </div>
+                    <p id="alert-message">
+                        Colaborador <strong id="alert-colaborador-nome">---</strong> (Matr.: <strong id="alert-colaborador-matr">---</strong>) precisa fazer a reciclagem, faça o agendamento.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Configuração do Modelo de Impressão -->
+            <div class="section-box highlight-box">
+                <div class="section-title">🖨️ Formato do Cartão (10 cm x 6 cm)</div>
+                <div class="form-grid">
+                    <div class="form-group span-2">
+                        <label for="select-print-mode">Modelo de Impressão:</label>
+                        <select id="select-print-mode" class="print-mode-select">
+                            <option value="pocket">🪪 Modelo Dobrável Carteira (Frente & Verso 10x6cm)</option>
+                            <option value="pvc">💳 Modelo Lado a Lado (Frente 10x6cm e Verso 10x6cm)</option>
+                            <option value="a4">📑 Folha A4 Grade (4 Cartões de 10x6cm com Guia)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dados Gerais -->
+            <div class="section-box">
+                <div class="section-title">👤 Identificação do Colaborador</div>
+                <div class="form-grid">
+                    <div class="form-group span-2">
+                        <label for="input-nome">Nome Completo:</label>
+                        <input type="text" id="input-nome" placeholder="Ex: Nome do Colaborador">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-funcao">Função:</label>
+                        <input type="text" id="input-funcao" placeholder="Ex: Eletricista de rede aérea">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-matricula">Matrícula:</label>
+                        <input type="text" id="input-matricula" placeholder="Ex: 1234567">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-data-emissao">Data de Emissão:</label>
+                        <input type="date" id="input-data-emissao">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-unidade">Gerência / Unidade:</label>
+                        <input type="text" id="input-unidade" placeholder="Ex: GERÊNCIA REGIONAL BAIXADA - OTNB">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matriz NR 10 -->
+            <div class="section-box">
+                <div class="section-title">⚡ NR 10 - Instalações Elétricas</div>
+                <div class="form-group full-width">
+                    <label>Abrangências e Permissões (BTS, BTC, ATS, ATC):</label>
+                    <div class="admin-table-wrapper">
+                        <table class="admin-nr10-table">
+                            <thead>
+                                <tr>
+                                    <th>Abrangência</th>
+                                    <th>BTS<br><small>BT Sem Tensão</small></th>
+                                    <th>BTC<br><small>BT Com Tensão</small></th>
+                                    <th>ATS<br><small>AT Sem Tensão</small></th>
+                                    <th>ATC<br><small>AT Com Tensão</small></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="desc">0. Sem intervenção Elétrica</td>
+                                    <td><input type="checkbox" id="nr10-r0-bts"></td>
+                                    <td><input type="checkbox" id="nr10-r0-btc"></td>
+                                    <td><input type="checkbox" id="nr10-r0-ats"></td>
+                                    <td><input type="checkbox" id="nr10-r0-atc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="desc">1. Com intervenção Elétrica</td>
+                                    <td><input type="checkbox" id="nr10-r1-bts"></td>
+                                    <td><input type="checkbox" id="nr10-r1-btc"></td>
+                                    <td><input type="checkbox" id="nr10-r1-ats"></td>
+                                    <td><input type="checkbox" id="nr10-r1-atc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="desc">2. Responsável de Trabalho</td>
+                                    <td><input type="checkbox" id="nr10-r2-bts"></td>
+                                    <td><input type="checkbox" id="nr10-r2-btc"></td>
+                                    <td><input type="checkbox" id="nr10-r2-ats"></td>
+                                    <td><input type="checkbox" id="nr10-r2-atc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="desc">3. Responsável Impedimento</td>
+                                    <td><input type="checkbox" id="nr10-r3-bts"></td>
+                                    <td><input type="checkbox" id="nr10-r3-btc"></td>
+                                    <td><input type="checkbox" id="nr10-r3-ats"></td>
+                                    <td><input type="checkbox" id="nr10-r3-atc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="desc">4. Em Zona Livre</td>
+                                    <td><input type="checkbox" id="nr10-r4-bts"></td>
+                                    <td><input type="checkbox" id="nr10-r4-btc"></td>
+                                    <td><input type="checkbox" id="nr10-r4-ats"></td>
+                                    <td><input type="checkbox" id="nr10-r4-atc"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                    <label for="input-validade-cartao">Validade do Cartão (NR 10):</label>
+                    <input type="date" id="input-validade-cartao">
+                </div>
+            </div>
+
+            <!-- NR 11/12, NR 33 e NR 35 -->
+            <div class="section-box">
+                <div class="section-title">🛠️ Outras Regulamentações (NR 11/12, 33, 35)</div>
+                <div class="form-grid">
+                    <div class="form-group span-2">
+                        <label for="input-autorizado-operar">NR 11/12 - Autorizado a Operar:</label>
+                        <input type="text" id="input-autorizado-operar" placeholder="Ex: CESTO AÉREO">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-nr33-autorizacao">NR 33 - Autorização a Trabalhar:</label>
+                        <select id="input-nr33-autorizacao">
+                            <option value="SIM">SIM</option>
+                            <option value="NÃO">NÃO</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-nr33-vigia">NR 33 - Vigia / Executante:</label>
+                        <select id="input-nr33-vigia">
+                            <option value="NÃO">NÃO</option>
+                            <option value="SIM">SIM</option>
+                        </select>
+                    </div>
+                    <div class="form-group span-2">
+                        <label for="input-nr33-supervisor">NR 33 - Supervisor Entrada:</label>
+                        <select id="input-nr33-supervisor">
+                            <option value="NÃO">NÃO</option>
+                            <option value="SIM">SIM</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-nr35-autorizado">NR 35 - Autorizado:</label>
+                        <select id="input-nr35-autorizado">
+                            <option value="SIM">SIM</option>
+                            <option value="NÃO">NÃO</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-nr35-validade">NR 35 - Validade:</label>
+                        <input type="date" id="input-nr35-validade">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observações & Assinatura Responsável -->
+            <div class="section-box">
+                <div class="section-title">📌 Observações & Responsável Técnico</div>
+                <div class="form-grid full-width">
+                    <div class="form-group">
+                        <label for="input-observacoes">Observações:</label>
+                        <textarea id="input-observacoes" rows="3" placeholder="Digite as observações técnicas..."></textarea>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label for="input-responsavel-tecnico">Responsável Técnico (Validador):</label>
+                        <input type="text" id="input-responsavel-tecnico" placeholder="Ex: ENG. MARCOS A. SILVA">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações do Administrador -->
+            <div class="admin-actions">
+                <button id="btn-validate" class="btn btn-validate">
+                    <span>💾</span> Salvar e Atualizar Planilha
+                </button>
+                <button id="btn-print" class="btn btn-print">
+                    <span>🖨️</span> Imprimir Cartão (10x6 cm)
+                </button>
+                <button id="btn-reset" class="btn btn-reset">
+                    <span>🔄</span> Restaurar Padrão
+                </button>
+            </div>
+        </section>
+
+        <!-- PAINEL DE VISUALIZAÇÃO DO CARTÃO PARA IMPRESSÃO -->
+        <section id="tab-preview" class="tab-content preview-panel">
+            <div class="preview-title">
+                <span>Pré-visualização do Cartão Modelo Dobrável (10 cm x 6 cm)</span>
+                <span id="status-indicator" class="status-indicator pending">⚠ Edição em Andamento</span>
+            </div>
+
+            <!-- EMBALAGEM DE IMPRESSÃO / MODELO COMPLETO (10x6cm cada lado) -->
+            <div class="printable-card-wrapper">
+                
+                <!-- MARCAS DE CORTE DE IMPRESSÃO SUPERIOR -->
+                <div class="crop-mark top-left"></div>
+                <div class="crop-mark top-right"></div>
+
+                <!-- CARTÃO FRENTE / CARD 1 (10cm x 6cm) -->
+                <div class="sep-card-side card-front">
+                    <div class="card-header">
+                        <div class="logo-area">
+                            <img src="imagens/light.png" alt="Light" class="logo-img">
+                            <span class="unidade card-unidade">GERÊNCIA REGIONAL BAIXADA - OTNB</span>
+                        </div>
+                        <div class="header-main-title">AUTORIZAÇÃO DE TRABALHO E ACESSO</div>
+                        <div class="header-sub-title">NR 10 - Segurança em Instalações e Serviços em Eletricidade</div>
+                    </div>
+
+                    <div class="card-front-body">
+                        <div class="top-info-grid">
+                            <div class="info-cell cell-nome">
+                                <span class="lbl">Nome:</span>
+                                <strong class="val card-nome"></strong>
+                            </div>
+                            <div class="info-cell cell-matr">
+                                <span class="lbl">Matr.:</span>
+                                <strong class="val card-matricula"></strong>
+                            </div>
+                            <div class="info-cell cell-funcao">
+                                <span class="lbl">Função:</span>
+                                <strong class="val card-funcao">ELETRICISTA DE REDE AEREA</strong>
+                            </div>
+                            <div class="info-cell cell-data-emissao">
+                                <span class="lbl">Data emissão:</span>
+                                <strong class="val card-data-emissao">06/07/2026</strong>
+                            </div>
+                        </div>
+
+                        <!-- TABELA NR 10 INTEGRADA CONFORME FOTO -->
+                        <div class="nr10-table-wrapper">
+                            <table class="tabela-nr10-oficial">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" class="th-abrangencia">ABRANGÊNCIA</th>
+                                        <th rowspan="2" class="v-header-empty"></th>
+                                        <th class="th-sub">BTS</th>
+                                        <th class="th-sub">BTC</th>
+                                        <th rowspan="2" class="v-header-empty"></th>
+                                        <th class="th-sub">ATS</th>
+                                        <th class="th-sub">ATC</th>
+                                    </tr>
+                                    <tr class="sub-hdr-desc">
+                                        <th>Sem Tensão</th>
+                                        <th>Com Tensão</th>
+                                        <th>Sem Tensão</th>
+                                        <th>Com Tensão</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="abrang-desc">Sem Intervenção Elétrica <span class="num">0</span></td>
+                                        <td rowspan="5" class="v-header v-header-bt"><span>BAIXA TENSÃO</span></td>
+                                        <td class="card-nr10-r0-bts"></td>
+                                        <td class="card-nr10-r0-btc"></td>
+                                        <td rowspan="5" class="v-header v-header-at"><span>ALTA TENSÃO</span></td>
+                                        <td class="card-nr10-r0-ats"></td>
+                                        <td class="card-nr10-r0-atc"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="abrang-desc">Com Intervenção Elétrica <span class="num">1</span></td>
+                                        <td class="card-nr10-r1-bts"></td>
+                                        <td class="card-nr10-r1-btc"></td>
+                                        <td class="card-nr10-r1-ats"></td>
+                                        <td class="card-nr10-r1-atc"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="abrang-desc">Responsável de Trabalho <span class="num">2</span></td>
+                                        <td class="card-nr10-r2-bts marcado">X</td>
+                                        <td class="card-nr10-r2-btc marcado">X</td>
+                                        <td class="card-nr10-r2-ats marcado">X</td>
+                                        <td class="card-nr10-r2-atc marcado">X</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="abrang-desc">Responsável Impedimento <span class="num">3</span></td>
+                                        <td class="card-nr10-r3-bts"></td>
+                                        <td class="card-nr10-r3-btc"></td>
+                                        <td class="card-nr10-r3-ats"></td>
+                                        <td class="card-nr10-r3-atc"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="abrang-desc">Em Zona Livre <span class="num">4</span></td>
+                                        <td class="card-nr10-r4-bts"></td>
+                                        <td class="card-nr10-r4-btc"></td>
+                                        <td class="card-nr10-r4-ats"></td>
+                                        <td class="card-nr10-r4-atc"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card-warning-footer">
+                            Abrangências 1, 2, 3, não permitem trabalhar sozinho em intervenção elétrica
+                        </div>
+                    </div>
+
+                    <div class="card-validade-row">
+                        <span class="lbl">Validade:</span>
+                        <strong class="val card-validade-cartao">28/05/2028</strong>
+                    </div>
+                </div>
+
+                <!-- LINHA GUIA DE DOBRA PARA POCKET -->
+                <div class="fold-line-divider">
+                    <span class="fold-label">✂️ DOBRE AQUI (LINHA CENTRAL DO CARTÃO 10x6cm) ✂️</span>
+                </div>
+
+                <!-- CARTÃO VERSO / CARD 2 (10cm x 6cm) -->
+                <div class="sep-card-side card-back">
+                    <div class="card-back-content">
+                        <!-- NR 11/12 -->
+                        <table class="tbl-nr1112">
+                            <tr>
+                                <td class="lbl-nr">NR 11/12</td>
+                                <td class="val-nr">Autorizado a Operar: <strong class="card-autorizado-operar">CESTO AÉREO</strong></td>
+                            </tr>
+                        </table>
+
+                        <!-- NR 33 -->
+                        <table class="tbl-nr33">
+                            <tr>
+                                <td rowspan="3" class="lbl-nr">NR 33</td>
+                                <td rowspan="3" class="desc-nr">Autorização a Trabalhar em Espaço Confinado</td>
+                                <td colspan="2" class="atrib-hdr">Atribuição</td>
+                            </tr>
+                            <tr>
+                                <td class="atrib-row">Vigia</td>
+                                <td class="atrib-val card-nr33-vigia">NÃO</td>
+                            </tr>
+                            <tr>
+                                <td class="atrib-row">Supervisor Entrad</td>
+                                <td class="atrib-val card-nr33-supervisor">NÃO</td>
+                            </tr>
+                        </table>
+
+                        <!-- NR 35 -->
+                        <table class="tbl-nr35">
+                            <tr>
+                                <td rowspan="2" class="lbl-nr">NR 35</td>
+                                <td class="desc-nr">Trabalho em Altura</td>
+                                <td class="val-nr35 card-nr35-autorizado">SIM</td>
+                            </tr>
+                            <tr>
+                                <td class="val-lbl">Validade:</td>
+                                <td class="val-date card-nr35-validade">27/05/28</td>
+                            </tr>
+                        </table>
+
+                        <!-- OBSERVAÇÕES -->
+                        <div class="card-obs-box">
+                            <strong>OBSERVAÇÕES:</strong> <span class="card-observacoes">Capacitado a realizar atividades de emergência Rede Aérea. E Manobras de rede aérea de MT. Reparo de rede de BT/MT. Leitura de Medidores</span>
+                        </div>
+
+                        <div class="card-validity-notice">
+                            Só terá validade mediante o crachá de acesso e identificação funcional.
+                        </div>
+
+                        <!-- ASSINATURAS -->
+                        <div class="card-signatures">
+                            <div class="sig-box">
+                                <div class="sig-image employee-sig"></div>
+                                <div class="sig-line"></div>
+                                <span>Assinatura do Empregado</span>
+                            </div>
+                            <div class="sig-box">
+                                <div class="sig-image tech-resp-sig"></div>
+                                <div class="sig-line"></div>
+                                <span class="card-resp-tecnico-label">Assinatura do Responsável Técnico</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MARCAS DE CORTE DE IMPRESSÃO INFERIOR -->
+                <div class="crop-mark bottom-left"></div>
+                <div class="crop-mark bottom-right"></div>
+
+            </div>
+
+            <!-- SEÇÃO DE CONTROLE DE PLANILHA (DOC_ACESSO_A_REDE) -->
+            <div class="section-box excel-section-box">
+                <div class="excel-box-header">
+                    <div class="excel-title-group">
+                        <span class="excel-icon">📊</span>
+                        <div>
+                            <h3>Controle por Planilha (doc_acesso_a_rede)</h3>
+                            <p class="excel-subtitle">Todas as edições atualizam a planilha e mantêm o histórico gerencial.</p>
+                        </div>
+                    </div>
+                    <div class="excel-path-badge">
+                        📁 <code>doc_acesso_a_rede/controle_acesso_rede.xlsx</code>
+                    </div>
+                </div>
+
+                <div class="excel-actions-row">
+                    <button id="btn-export-xlsx" class="btn btn-xlsx">
+                        <span>📊</span> Baixar Planilha Excel (.xlsx)
+                    </button>
+                    <button id="btn-export-csv" class="btn btn-csv">
+                        <span>📄</span> Baixar Planilha (.csv)
+                    </button>
+                </div>
+
+                <!-- Seção de Alertas de Vencimento -->
+                <div class="section-box alert-section-box" style="background-color: #fef2f2; border-color: #fca5a5; margin-top: 20px;">
+                    <div class="section-title" style="color: #991b1b; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
+                        <span>⚠️</span> Alertas de Credenciais a Vencer ou Vencidas (Banco de Dados)
+                    </div>
+                    <div id="expiration-alerts-list" class="expiration-alerts-list">
+                        <!-- Preenchido via script.js -->
+                    </div>
+                </div>
+
+                <div class="excel-history-wrapper">
+                    <h4>Histórico de Atualizações da Planilha:</h4>
+                    <table id="tbl-excel-history" class="excel-history-table">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Matrícula</th>
+                                <th>Nome</th>
+                                <th>Função</th>
+                                <th>NR10 Val.</th>
+                                <th>NR35 Val.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="excel-history-body">
+                            <!-- Preenchido via script.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
