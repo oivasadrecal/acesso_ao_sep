@@ -29,36 +29,18 @@ def create_csv_and_xlsx():
         "NR35 Validade"
     ]
 
-    initial_row = [
-        "2026-08-02 17:35",
-        "",
-        "",
-        "Eletricista de rede aérea",
-        "GERÊNCIA REGIONAL BAIXADA - OTNB",
-        "06/07/2026",
-        "28/05/2028",
-        "Linha 2 (Resp. Trabalho)",
-        "Linha 2 (Resp. Trabalho)",
-        "Linha 2 (Resp. Trabalho)",
-        "Linha 2 (Resp. Trabalho)",
-        "CESTO AÉREO",
-        "SIM",
-        "NÃO",
-        "NÃO",
-        "SIM",
-        "27/05/2028"
-    ]
+    initial_rows = []
 
     # Writing CSV with UTF-8 BOM so Excel opens it with correct encoding
     with open(csv_path, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.writer(f, delimiter=";")
         writer.writerow(headers)
-        writer.writerow(initial_row)
+        writer.writerows(initial_rows)
 
     print(f"CSV criado com sucesso: {csv_path}")
 
     # Create minimal XLSX zip archive
-    create_xlsx(xlsx_path, [headers, initial_row])
+    create_xlsx(xlsx_path, [headers] + initial_rows)
     print(f"XLSX criado com sucesso: {xlsx_path}")
 
 def create_xlsx(filepath, rows):

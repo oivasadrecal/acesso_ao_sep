@@ -450,13 +450,33 @@
                     </div>
                 </div>
 
-                <div class="excel-actions-row">
+                <div class="excel-actions-row" style="flex-wrap: wrap; gap: 8px;">
                     <button id="btn-export-xlsx" class="btn btn-xlsx">
                         <span>📊</span> Baixar Planilha Excel (.xlsx)
                     </button>
                     <button id="btn-export-csv" class="btn btn-csv">
                         <span>📄</span> Baixar Planilha (.csv)
                     </button>
+                    <button id="btn-import-file" class="btn btn-validate" style="background-color: #0284c7;">
+                        <span>📂</span> Importar Planilha (.xlsx / .csv)
+                    </button>
+                    <input type="file" id="input-import-file" accept=".xlsx,.xls,.csv" style="display: none;">
+                </div>
+
+                <!-- Integração com Google Sheets -->
+                <div class="section-box" style="background-color: #f0fdf4; border-color: #86efac; margin-top: 14px; padding: 12px;">
+                    <div class="section-title" style="color: #166534; font-size: 0.85rem; margin-bottom: 8px;">
+                        <span>☁️</span> Sincronizar com Google Sheets (Planilha Online)
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                        <input type="url" id="input-gsheets-url" placeholder="Cole aqui o link da sua planilha do Google Sheets (Compartilhada ou Publicada na Web como CSV)..." style="flex: 1; min-width: 240px; padding: 8px 10px; border: 1px solid #86efac; border-radius: 6px; font-size: 0.82rem;">
+                        <button id="btn-sync-gsheets" class="btn btn-xlsx" style="background-color: #15803d; padding: 8px 14px; font-size: 0.82rem;">
+                            <span>🔄</span> Baixar do Google Sheets
+                        </button>
+                    </div>
+                    <small style="display: block; margin-top: 6px; color: #15803d; font-size: 0.75rem;">
+                        Dica: No Google Sheets, vá em <strong>Arquivo &gt; Compartilhar &gt; Publicar na web (formato CSV)</strong> ou deixe o link como "Qualquer pessoa com o link pode ver" e cole o link acima.
+                    </small>
                 </div>
 
                 <!-- Seção de Alertas de Vencimento -->
@@ -470,7 +490,12 @@
                 </div>
 
                 <div class="excel-history-wrapper">
-                    <h4>Histórico de Atualizações da Planilha:</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4 style="margin: 0;">Colaboradores Cadastrados na Planilha:</h4>
+                        <button id="btn-clear-history" class="btn btn-reset" style="padding: 4px 10px; font-size: 0.75rem;">
+                            <span>🗑️</span> Limpar Banco
+                        </button>
+                    </div>
                     <table id="tbl-excel-history" class="excel-history-table">
                         <thead>
                             <tr>
@@ -480,6 +505,7 @@
                                 <th>Função</th>
                                 <th>NR10 Val.</th>
                                 <th>NR35 Val.</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="excel-history-body">

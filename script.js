@@ -29,65 +29,55 @@ const defaultData = {
     }
 };
 
-// Colaboradores Pré-registrados no Sistema
-const preRegisteredCollaborators = {
-    "1008663": "Genaro Ribeiro Costa",
-    "1001234": "Hélio Moura Silva",
-    "1005678": "Otoni Silva Manford",
-    "1009101": "Celso Lima Cordeiro",
-    "1001213": "Miguel Avelar Souza",
-    "1001415": "Rickson Melo Brito",
-    "1001617": "Mouzer Lima Bolder"
-};
+// Colaboradores Pré-registrados no Sistema (limpo para novos cadastros)
+const preRegisteredCollaborators = {};
 
-// Estado Atual da Aplicação
-let currentData = loadSavedData();
-let excelHistory = loadSavedExcelHistory();
+// Matrículas de exemplo antigas que devem ser removidas do cache
+const legacyExampleMatriculas = new Set([
+    "1008663", "1001234", "1005678", "1009101", "1001213", "1001415", "1001617"
+]);
 
-// Carregar dados salvos ou usar padrão
-function loadSavedData() {
-    const saved = localStorage.getItem("sep_card_admin_data");
-    if (saved) {
-        try {
-            const parsed = JSON.parse(saved);
-            if (parsed.nome === "SAVIO GALVAO LACERDA FILHO") parsed.nome = "";
-            if (parsed.matricula === "4008663") parsed.matricula = "";
-            return { ...defaultData, ...parsed };
-        } catch (e) {
-            console.error("Erro ao ler localStorage", e);
-        }
-    }
-    return JSON.parse(JSON.stringify(defaultData));
-}
+// Limpeza única para apagar o registro antigo de Sávio Galvão Lacerda Filho (4008663) e permitir recadastrá-lo normalmente
+(function runOneTimeCleanup() {
+    if (localStorage.getItem("sep_cleanup_savio_4008663_done") === "true") return;
 
-// Salvar no localStorage
-function saveData() {
-    localStorage.setItem("sep_card_admin_data", JSON.stringify(currentData));
-}
+    const isSavioOr4008663 = (nome, matr) => {
+        const n = String(nome || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase();
+        const m = String(matr || "").trim();
+        return m === "4008663" || n.includes("SAVIO GALVAO LACERDA") || legacyExampleMatriculas.has(m);
+    };
 
-// Histórico da Planilha em LocalStorage
-function loadSavedExcelHistory() {
-    const saved = localStorage.getItem("sep_excel_history_data");
-    if (saved) {
-        try {
-            let parsed = JSON.parse(saved);
-            if (Array.isArray(parsed)) {
-                const filtered = parsed.filter(item => item.nome !== "SAVIO GALVAO LACERDA FILHO" && item.matricula !== "4008663");
-                if (filtered.length !== parsed.length) {
-                    localStorage.setItem("sep_excel_history_data", JSON.stringify(filtered));
-                }
-                return filtered;
+    try {
+        const savedAdmin = localStorage.getItem("sep_card_admin_data");
+        if (savedAdmin) {
+            const parsed = JSON.parse(savedAdmin);
+            if (isSavioOr4008663(parsed.nome, parsed.matricula)) {
+                parsed.nome = "";
+                parsed.matricula = "";
+                localStorage.setItem("sep_card_admin_data", JSON.stringify(parsed));
             }
-            return parsed;
-        } catch (e) {
-            console.error("Erro ao ler histórico da planilha", e);
         }
+
+        const savedHistory = localStorage.getItem("sep_excel_history_data");
+        if (savedHistory) {
+            const parsedHist = JSON.parse(savedHistory);
+            if (Array.isArray(parsedHist)) {
+                const cleaned = parsedHist.filter(item => !isSavioOr4008663(item.nome, item.matricula));
+                localStorage.setItem("sep_excel_history_data", JSON.stringify(cleaned));
+            }
+        }
+    } catch (e) {
+        console.error("Erro na limpeza inicial do localStorage", e);
     }
-    // Entrada inicial padrão correspondente aos arquivos em doc_acesso_a_rede
-    return [{
-        timestamp: "2026-08-02 17:35",
-        matricula: "",
-        nome: "",
+
+    localStorage.setItem("sep_cleanup_savio_4008663_done", "true");
+})();
+
+function createDefaultRecord(matricula, nome) {
+    return {
+        timestamp: new Date().toLocaleDateString('pt-BR') + " " + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+        matricula: matricula,
+        nome: nome,
         funcao: "Eletricista de rede aérea",
         unidade: "GERÊNCIA REGIONAL BAIXADA - OTNB",
         dataEmissao: "2026-07-06",
@@ -106,13 +96,108 @@ function loadSavedExcelHistory() {
         nr33Supervisor: "NÃO",
         nr35Autorizado: "SIM",
         nr35Validade: "2028-05-27"
-    }];
+    };
+}
+
+// Estado Atual da Aplicação
+let currentData = loadSavedData();
+let excelHistory = loadSavedExcelHistory();
+
+// Carregar dados salvos ou usar padrão
+function loadSavedData() {
+    const saved = localStorage.getItem("sep_card_admin_data");
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            if (legacyExampleMatriculas.has(String(parsed.matricula).trim())) {
+                parsed.nome = "";
+                parsed.matricula = "";
+            }
+            return { ...defaultData, ...parsed };
+        } catch (e) {
+            console.error("Erro ao ler localStorage", e);
+        }
+    }
+    return JSON.parse(JSON.stringify(defaultData));
+}
+
+// Salvar no localStorage
+function saveData() {
+    localStorage.setItem("sep_card_admin_data", JSON.stringify(currentData));
+}
+
+// Histórico da Planilha em LocalStorage
+function loadSavedExcelHistory() {
+    let records = [];
+    const saved = localStorage.getItem("sep_excel_history_data");
+    if (saved) {
+        try {
+            let parsed = JSON.parse(saved);
+            if (Array.isArray(parsed)) {
+                records = parsed.filter(item =>
+                    !legacyExampleMatriculas.has(String(item.matricula || "").trim()) &&
+                    item.matricula &&
+                    item.matricula !== "---"
+                );
+                if (records.length !== parsed.length) {
+                    localStorage.setItem("sep_excel_history_data", JSON.stringify(records));
+                }
+            }
+        } catch (e) {
+            console.error("Erro ao ler histórico da planilha", e);
+        }
+    }
+
+    // Garantir que colaboradores pré-registrados no código (se houver) estejam no banco de dados
+    let updated = false;
+    Object.entries(preRegisteredCollaborators).forEach(([matr, nome]) => {
+        if (!records.some(item => String(item.matricula).trim() === matr)) {
+            records.push(createDefaultRecord(matr, nome));
+            updated = true;
+        }
+    });
+
+    if (updated || !saved) {
+        localStorage.setItem("sep_excel_history_data", JSON.stringify(records));
+    }
+
+    return records;
 }
 
 function saveExcelHistory() {
     localStorage.setItem("sep_excel_history_data", JSON.stringify(excelHistory));
     renderExcelHistoryTable();
     renderExpirationAlerts();
+    renderMatriculaDatalist();
+}
+
+// Criar/atualizar datalist com matrículas cadastradas para facilitar a busca
+function renderMatriculaDatalist() {
+    let datalist = document.getElementById("matriculas-datalist");
+    if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "matriculas-datalist";
+        document.body.appendChild(datalist);
+    }
+    datalist.innerHTML = "";
+
+    const seen = new Set();
+    excelHistory.forEach(item => {
+        const m = String(item.matricula || "").trim();
+        if (m && m !== "---" && !seen.has(m)) {
+            seen.add(m);
+            const opt = document.createElement("option");
+            opt.value = m;
+            opt.label = item.nome ? `${m} - ${item.nome}` : m;
+            datalist.appendChild(opt);
+        }
+    });
+
+    const inputColab = document.getElementById("colaborador-search-matricula");
+    if (inputColab) inputColab.setAttribute("list", "matriculas-datalist");
+
+    const inputAdmin = document.getElementById("input-matricula");
+    if (inputAdmin) inputAdmin.setAttribute("list", "matriculas-datalist");
 }
 
 // Renderizar Tabela de Histórico da Planilha na Página Admin
@@ -122,18 +207,352 @@ function renderExcelHistoryTable() {
 
     tbody.innerHTML = "";
 
+    if (excelHistory.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="7" style="text-align: center; color: #64748b; padding: 14px;">Nenhum colaborador cadastrado ainda. Preencha o formulário acima ou importe uma planilha.</td>`;
+        tbody.appendChild(tr);
+        return;
+    }
+
     excelHistory.slice().reverse().forEach(record => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td><strong>${record.timestamp}</strong></td>
+            <td><strong>${record.timestamp || "---"}</strong></td>
             <td>${record.matricula}</td>
             <td>${record.nome}</td>
             <td>${record.funcao}</td>
             <td>${formatDateDisplay(record.validadeCartao)}</td>
             <td>${formatDateDisplay(record.nr35Validade)}</td>
+            <td style="white-space: nowrap;">
+                <button type="button" class="btn-row-load" data-matr="${record.matricula}" title="Carregar no formulário" style="border: none; background: #e0f2fe; color: #0369a1; padding: 3px 7px; border-radius: 4px; cursor: pointer; margin-right: 4px;">✏️</button>
+                <button type="button" class="btn-row-delete" data-matr="${record.matricula}" title="Excluir cadastro" style="border: none; background: #fee2e2; color: #b91c1c; padding: 3px 7px; border-radius: 4px; cursor: pointer;">🗑️</button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
+
+    tbody.querySelectorAll(".btn-row-load").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const matr = btn.getAttribute("data-matr");
+            const rec = excelHistory.find(item => String(item.matricula) === String(matr));
+            if (rec) {
+                Object.assign(currentData, rec);
+                if (rec.nr10Matrix) {
+                    currentData.nr10Matrix = JSON.parse(JSON.stringify(rec.nr10Matrix));
+                }
+                populateFormFields();
+                updateCardPreview();
+                saveData();
+            }
+        });
+    });
+
+    tbody.querySelectorAll(".btn-row-delete").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const matr = btn.getAttribute("data-matr");
+            if (confirm(`Deseja remover a matrícula ${matr} do banco de dados?`)) {
+                excelHistory = excelHistory.filter(item => String(item.matricula) !== String(matr));
+                saveExcelHistory();
+            }
+        });
+    });
+}
+
+// Converter DD/MM/AAAA para AAAA-MM-DD
+function normalizeDateInput(dateStr) {
+    if (!dateStr) return "";
+    const s = String(dateStr).trim();
+    if (s.includes("/")) {
+        const parts = s.split("/");
+        if (parts.length === 3) {
+            let [d, m, y] = parts;
+            if (y.length === 2) y = "20" + y;
+            return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+        }
+    }
+    return s;
+}
+
+// Reconstruir matriz NR10 a partir do resumo da planilha (ex: "L2 [BTS,BTC,ATS,ATC]")
+function parseNR10SummaryToMatrix(summaryStr) {
+    const matrix = JSON.parse(JSON.stringify(defaultData.nr10Matrix));
+    if (!summaryStr || typeof summaryStr !== "string") return matrix;
+    if (!summaryStr.includes("L")) return matrix;
+
+    for (let r = 0; r < 5; r++) {
+        matrix[`row${r}`] = { bts: false, btc: false, ats: false, atc: false };
+    }
+
+    const regex = /L([0-4])\s*\[([^\]]+)\]/gi;
+    let match;
+    while ((match = regex.exec(summaryStr)) !== null) {
+        const rowIdx = match[1];
+        const cols = match[2].toUpperCase().split(",").map(c => c.trim());
+        const rowObj = matrix[`row${rowIdx}`];
+        if (rowObj) {
+            cols.forEach(c => {
+                if (c === "BTS") rowObj.bts = true;
+                if (c === "BTC") rowObj.btc = true;
+                if (c === "ATS") rowObj.ats = true;
+                if (c === "ATC") rowObj.atc = true;
+            });
+        }
+    }
+    return matrix;
+}
+
+// Converter linhas de uma planilha (matriz 2D) em registros do sistema
+function parseRowsToRecords(rows) {
+    if (!Array.isArray(rows) || rows.length === 0) return [];
+
+    // Identificar se a primeira linha é cabeçalho
+    const firstRow = rows[0].map(c => String(c || "").trim().toLowerCase());
+    const hasHeader = firstRow.some(h =>
+        h.includes("matr") || h.includes("nome") || h.includes("fun") || h.includes("data")
+    );
+
+    let colMap = {
+        timestamp: 0,
+        matricula: 1,
+        nome: 2,
+        funcao: 3,
+        unidade: 4,
+        dataEmissao: 5,
+        validadeCartao: 6,
+        nr10Summary: 7,
+        autorizadoOperar: 8,
+        nr33Autorizacao: 9,
+        nr33Vigia: 10,
+        nr33Supervisor: 11,
+        nr35Autorizado: 12,
+        nr35Validade: 13
+    };
+
+    if (hasHeader) {
+        // Caso seja uma planilha simples de 2 ou 3 colunas (ex: Matrícula | Nome | Função)
+        const matrIdx = firstRow.findIndex(h => h.includes("matr") || h.includes("id") || h.includes("registro"));
+        const nomeIdx = firstRow.findIndex(h => h.includes("nome") || h.includes("colaborador"));
+        const funcIdx = firstRow.findIndex(h => h.includes("fun") || h.includes("cargo"));
+        const unidIdx = firstRow.findIndex(h => h.includes("unid") || h.includes("ger"));
+        const emisIdx = firstRow.findIndex(h => h.includes("emiss"));
+        const val10Idx = firstRow.findIndex(h => h.includes("validade cart") || h.includes("nr10 val") || h === "validade");
+        const nr10Idx = firstRow.findIndex(h => h.includes("abrang") || h.includes("nr10"));
+        const nr11Idx = firstRow.findIndex(h => h.includes("11") || h.includes("12") || h.includes("operar"));
+        const nr33AutIdx = firstRow.findIndex(h => h.includes("33") && (h.includes("aut") || h.includes("espa")));
+        const nr33VigIdx = firstRow.findIndex(h => h.includes("vigia"));
+        const nr33SupIdx = firstRow.findIndex(h => h.includes("superv"));
+        const nr35AutIdx = firstRow.findIndex(h => h.includes("35") && (h.includes("altura") || h.includes("aut")));
+        const nr35ValIdx = firstRow.findIndex(h => h.includes("35") && h.includes("val"));
+
+        if (matrIdx !== -1 && nomeIdx !== -1) {
+            colMap = {
+                timestamp: firstRow.findIndex(h => h.includes("data/hora") || h.includes("carimbo")),
+                matricula: matrIdx,
+                nome: nomeIdx,
+                funcao: funcIdx,
+                unidade: unidIdx,
+                dataEmissao: emisIdx,
+                validadeCartao: val10Idx,
+                nr10Summary: nr10Idx,
+                autorizadoOperar: nr11Idx,
+                nr33Autorizacao: nr33AutIdx,
+                nr33Vigia: nr33VigIdx,
+                nr33Supervisor: nr33SupIdx,
+                nr35Autorizado: nr35AutIdx,
+                nr35Validade: nr35ValIdx
+            };
+        } else if (rows[0].length >= 2 && rows[0].length <= 4) {
+            colMap.matricula = 0;
+            colMap.nome = 1;
+            colMap.funcao = 2;
+        }
+    } else if (rows[0].length >= 2 && rows[0].length <= 4) {
+        colMap.matricula = 0;
+        colMap.nome = 1;
+        colMap.funcao = 2;
+    }
+
+    const dataRows = hasHeader ? rows.slice(1) : rows;
+    const records = [];
+
+    dataRows.forEach(row => {
+        if (!Array.isArray(row)) return;
+        const getCol = (idx) => (idx !== undefined && idx >= 0 && idx < row.length) ? String(row[idx] ?? "").trim() : "";
+
+        const matr = getCol(colMap.matricula);
+        const nome = getCol(colMap.nome);
+        if (!matr || matr === "---" || legacyExampleMatriculas.has(matr)) return;
+
+        const base = createDefaultRecord(matr, nome || "---");
+        const nr10Sum = getCol(colMap.nr10Summary) || base.nr10Summary;
+
+        records.push({
+            timestamp: getCol(colMap.timestamp) || base.timestamp,
+            matricula: matr,
+            nome: nome || "---",
+            funcao: getCol(colMap.funcao) || base.funcao,
+            unidade: getCol(colMap.unidade) || base.unidade,
+            dataEmissao: normalizeDateInput(getCol(colMap.dataEmissao)) || base.dataEmissao,
+            validadeCartao: normalizeDateInput(getCol(colMap.validadeCartao)) || base.validadeCartao,
+            nr10Summary: nr10Sum,
+            nr10Matrix: parseNR10SummaryToMatrix(nr10Sum),
+            autorizadoOperar: getCol(colMap.autorizadoOperar) || base.autorizadoOperar,
+            nr33Autorizacao: (getCol(colMap.nr33Autorizacao) || base.nr33Autorizacao).toUpperCase(),
+            nr33Vigia: (getCol(colMap.nr33Vigia) || base.nr33Vigia).toUpperCase(),
+            nr33Supervisor: (getCol(colMap.nr33Supervisor) || base.nr33Supervisor).toUpperCase(),
+            nr35Autorizado: (getCol(colMap.nr35Autorizado) || base.nr35Autorizado).toUpperCase(),
+            nr35Validade: normalizeDateInput(getCol(colMap.nr35Validade)) || base.nr35Validade
+        });
+    });
+
+    return records;
+}
+
+// Fazer parse de texto CSV (suporta separador ';' ou ',')
+function parseCSVText(csvText) {
+    const cleanText = csvText.replace(/^\uFEFF/, "").trim();
+    if (!cleanText) return [];
+
+    const lines = cleanText.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (lines.length === 0) return [];
+
+    const firstLine = lines[0];
+    const delimiter = (firstLine.split(";").length > firstLine.split(",").length) ? ";" : ",";
+
+    const rows = lines.map(line => {
+        const result = [];
+        let cur = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    cur += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === delimiter && !inQuotes) {
+                result.push(cur.trim());
+                cur = "";
+            } else {
+                cur += ch;
+            }
+        }
+        result.push(cur.trim());
+        return result;
+    });
+
+    return parseRowsToRecords(rows);
+}
+
+// Mesclar registros importados no histórico atual
+function mergeImportedRecords(newRecords) {
+    if (!Array.isArray(newRecords) || newRecords.length === 0) return 0;
+    let count = 0;
+    newRecords.forEach(rec => {
+        const idx = excelHistory.findIndex(item => String(item.matricula).trim() === String(rec.matricula).trim());
+        if (idx !== -1) {
+            excelHistory[idx] = rec;
+        } else {
+            excelHistory.push(rec);
+        }
+        count++;
+    });
+    saveExcelHistory();
+    return count;
+}
+
+// Converter qualquer link do Google Sheets para link de exportação CSV direto
+function convertGoogleSheetsUrlToCsv(url) {
+    const trimmed = String(url || "").trim();
+    if (!trimmed) return "";
+
+    // Se já for um link "Publicado na Web" com output=csv
+    if (trimmed.includes("output=csv") || trimmed.endsWith(".csv")) {
+        return trimmed;
+    }
+
+    // Se for link publicado na web com /pubhtml, trocar para /pub?output=csv
+    if (trimmed.includes("/pubhtml")) {
+        return trimmed.replace("/pubhtml", "/pub?output=csv");
+    }
+    if (trimmed.includes("/pub")) {
+        return trimmed + (trimmed.includes("?") ? "&output=csv" : "?output=csv");
+    }
+
+    // Extrair ID da planilha padrão: https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit#gid=0
+    const match = trimmed.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (match && match[1]) {
+        const sheetId = match[1];
+        const gidMatch = trimmed.match(/[#&?]gid=([0-9]+)/);
+        const gidParam = gidMatch ? `&gid=${gidMatch[1]}` : "";
+        return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv${gidParam}`;
+    }
+
+    return trimmed;
+}
+
+// Baixar e sincronizar dados de uma planilha do Google Sheets
+async function syncFromGoogleSheets(rawUrl, silent = false) {
+    const csvUrl = convertGoogleSheetsUrlToCsv(rawUrl);
+    if (!csvUrl) {
+        if (!silent) alert("Por favor, cole um link válido do Google Sheets.");
+        return 0;
+    }
+
+    try {
+        localStorage.setItem("sep_gsheets_url", rawUrl.trim());
+        const response = await fetch(csvUrl, { cache: "no-store" });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const csvText = await response.text();
+        const records = parseCSVText(csvText);
+        const count = mergeImportedRecords(records);
+        if (!silent) {
+            if (count > 0) {
+                alert(`✅ Sincronizado com sucesso! ${count} colaborador(es) carregado(s) do Google Sheets.`);
+            } else {
+                alert("⚠️ A planilha foi acessada, mas nenhuma linha com Matrícula e Nome foi encontrada.");
+            }
+        }
+        return count;
+    } catch (err) {
+        console.warn("Aviso ao sincronizar Google Sheets:", err);
+        if (!silent) {
+            alert("❌ Não foi possível baixar a planilha do Google Sheets.\n\nVerifique se no Google Sheets você foi em:\n1. 'Arquivo > Compartilhar > Publicar na web' (formato CSV), OU\n2. 'Compartilhar > Qualquer pessoa com o link pode ver'.");
+        }
+        return 0;
+    }
+}
+
+// Carregar automaticamente CSV do repositório (GitHub Pages) e Google Sheets salvo
+async function loadExternalSpreadsheetsOnInit() {
+    const gsheetsInput = document.getElementById("input-gsheets-url");
+    const savedGSheetsUrl = localStorage.getItem("sep_gsheets_url") || "";
+    if (gsheetsInput && savedGSheetsUrl) {
+        gsheetsInput.value = savedGSheetsUrl;
+    }
+
+    // 1. Tentar carregar doc_acesso_a_rede/controle_acesso_rede.csv do próprio site (GitHub Pages / Servidor Local)
+    try {
+        const res = await fetch("doc_acesso_a_rede/controle_acesso_rede.csv", { cache: "no-store" });
+        if (res.ok) {
+            const text = await res.text();
+            const records = parseCSVText(text);
+            if (records.length > 0) {
+                mergeImportedRecords(records);
+            }
+        }
+    } catch (e) {
+        // Ignorado quando aberto via file:// local sem servidor HTTP
+    }
+
+    // 2. Se houver URL do Google Sheets configurada, sincronizar silenciosamente
+    if (savedGSheetsUrl) {
+        await syncFromGoogleSheets(savedGSheetsUrl, true);
+    }
 }
 
 // Formatar data AAAA-MM-DD para DD/MM/AAAA
@@ -244,7 +663,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCardPreview();
     renderExcelHistoryTable();
     renderExpirationAlerts();
+    renderMatriculaDatalist();
     setupEventListeners();
+    loadExternalSpreadsheetsOnInit();
 });
 
 // Preencher formulário admin com os dados do estado
@@ -574,10 +995,12 @@ function setupEventListeners() {
         input.addEventListener("input", () => {
             currentData.statusValidacao = "PENDENTE";
             updateCardPreview();
+            saveData();
         });
         input.addEventListener("change", () => {
             currentData.statusValidacao = "PENDENTE";
             updateCardPreview();
+            saveData();
         });
     });
 
@@ -681,6 +1104,76 @@ function setupEventListeners() {
         btnExportCSV.addEventListener("click", exportToCSV);
     }
 
+    // Botão Importar Planilha (.xlsx ou .csv)
+    const btnImportFile = document.getElementById("btn-import-file");
+    const inputImportFile = document.getElementById("input-import-file");
+    if (btnImportFile && inputImportFile) {
+        btnImportFile.addEventListener("click", () => {
+            inputImportFile.click();
+        });
+
+        inputImportFile.addEventListener("change", (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const fileName = file.name.toLowerCase();
+            if (fileName.endsWith(".csv")) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const records = parseCSVText(String(evt.target.result || ""));
+                    const count = mergeImportedRecords(records);
+                    alert(`✅ ${count} colaborador(es) importado(s) do arquivo CSV com sucesso!`);
+                };
+                reader.readAsText(file, "UTF-8");
+            } else if (typeof XLSX !== "undefined") {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    try {
+                        const data = new Uint8Array(evt.target.result);
+                        const workbook = XLSX.read(data, { type: "array" });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, raw: false });
+                        const records = parseRowsToRecords(rows);
+                        const count = mergeImportedRecords(records);
+                        alert(`✅ ${count} colaborador(es) importado(s) da planilha Excel com sucesso!`);
+                    } catch (err) {
+                        console.error("Erro ao ler planilha Excel:", err);
+                        alert("❌ Erro ao ler o arquivo Excel. Verifique o formato ou tente importar como .csv.");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert("Por favor, selecione um arquivo .csv.");
+            }
+            inputImportFile.value = "";
+        });
+    }
+
+    // Botão Sincronizar Google Sheets
+    const btnSyncGSheets = document.getElementById("btn-sync-gsheets");
+    const inputGSheetsUrl = document.getElementById("input-gsheets-url");
+    if (btnSyncGSheets && inputGSheetsUrl) {
+        btnSyncGSheets.addEventListener("click", () => {
+            syncFromGoogleSheets(inputGSheetsUrl.value, false);
+        });
+    }
+
+    // Botão Limpar Todo o Banco de Dados
+    const btnClearHistory = document.getElementById("btn-clear-history");
+    if (btnClearHistory) {
+        btnClearHistory.addEventListener("click", () => {
+            if (confirm("Deseja realmente apagar todos os colaboradores cadastrados no banco de dados?")) {
+                excelHistory = [];
+                saveExcelHistory();
+                currentData.nome = "";
+                currentData.matricula = "";
+                saveData();
+                populateFormFields();
+                updateCardPreview();
+            }
+        });
+    }
+
     // Botão Resetar Dados
     const btnReset = document.getElementById("btn-reset");
     if (btnReset) {
@@ -714,7 +1207,7 @@ function setupEventListeners() {
     const btnSearch = document.getElementById("btn-colaborador-search");
     const inputSearch = document.getElementById("colaborador-search-matricula");
 
-    const performSearch = () => {
+    const performSearch = async () => {
         if (!inputSearch) return;
         const matr = inputSearch.value.trim();
         if (!matr) {
@@ -722,8 +1215,29 @@ function setupEventListeners() {
             return;
         }
 
-        // Buscar no histórico da planilha
-        const record = excelHistory.find(item => item.matricula === matr);
+        // Recarregar histórico atualizado do localStorage e sincronizar planilha externa se houver
+        excelHistory = loadSavedExcelHistory();
+        await loadExternalSpreadsheetsOnInit();
+        const savedAdminData = loadSavedData();
+
+        // Buscar no histórico da planilha (por matrícula exata ou por nome)
+        let record = excelHistory.find(item =>
+            String(item.matricula || "").trim() === matr ||
+            String(item.nome || "").trim().toLowerCase() === matr.toLowerCase()
+        );
+
+        // Fallback: verificar se corresponde aos colaboradores pré-registrados
+        if (!record && preRegisteredCollaborators[matr]) {
+            record = createDefaultRecord(matr, preRegisteredCollaborators[matr]);
+            excelHistory.push(record);
+            saveExcelHistory();
+        }
+
+        // Fallback: verificar se corresponde ao cadastro atual em edição no painel Admin
+        if (!record && savedAdminData && String(savedAdminData.matricula || "").trim() === matr && savedAdminData.nome) {
+            record = savedAdminData;
+        }
+
         if (record) {
             currentData.nome = record.nome;
             currentData.funcao = record.funcao;
@@ -744,9 +1258,15 @@ function setupEventListeners() {
             
             saveData();
             updateCardPreview();
-            alert(`✅ Cartão de ${record.nome} carregado com sucesso!`);
+            alert(`✅ Cartão de ${record.nome} (Matr.: ${record.matricula}) carregado com sucesso!`);
         } else {
-            alert("❌ Matrícula não encontrada no banco de dados. Solicite o cadastro ao administrador.");
+            const lista = excelHistory
+                .map(r => `${r.matricula} (${r.nome})`)
+                .filter(Boolean);
+            const msgExtra = lista.length > 0
+                ? `\n\nMatrículas atualmente cadastradas:\n• ${lista.join("\n• ")}`
+                : `\n\nNenhum colaborador foi cadastrado ainda. Acesse a Área do Administrador para cadastrar ou importar sua planilha.`;
+            alert(`❌ Matrícula "${matr}" não encontrada no banco de dados.${msgExtra}`);
         }
     };
 
