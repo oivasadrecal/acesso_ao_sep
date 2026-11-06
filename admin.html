@@ -70,6 +70,7 @@
                         <label for="select-print-mode">Modelo de Impressão:</label>
                         <select id="select-print-mode" class="print-mode-select">
                             <option value="pocket">🪪 Modelo Dobrável Carteira (Frente & Verso 10x6cm)</option>
+                            <option value="pocket-7x5">🪪 Modelo Dobrável (7x5 cm)</option>
                             <option value="pvc">💳 Modelo Lado a Lado (Frente 10x6cm e Verso 10x6cm)</option>
                             <option value="a4">📑 Folha A4 Grade (4 Cartões de 10x6cm com Guia)</option>
                         </select>
@@ -172,7 +173,11 @@
                 <div class="form-grid">
                     <div class="form-group span-2">
                         <label for="input-autorizado-operar">NR 11/12 - Autorizado a Operar:</label>
-                        <input type="text" id="input-autorizado-operar" placeholder="Ex: CESTO AÉREO">
+                        <select id="input-autorizado-operar">
+                            <option value="CESTO AÉREO">CESTO AÉREO</option>
+                            <option value="CESTO AÉREO / MOTOPODA">CESTO AÉREO / MOTOPODA</option>
+                            <option value="CESTO AÉREO / MOTOPODA / MOTOSERRA">CESTO AÉREO / MOTOPODA / MOTOSERRA</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -189,12 +194,16 @@
                             <option value="SIM">SIM</option>
                         </select>
                     </div>
-                    <div class="form-group span-2">
+                    <div class="form-group">
                         <label for="input-nr33-supervisor">NR 33 - Supervisor Entrada:</label>
                         <select id="input-nr33-supervisor">
                             <option value="NÃO">NÃO</option>
                             <option value="SIM">SIM</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-nr33-validade">NR 33 - Validade:</label>
+                        <input type="date" id="input-nr33-validade">
                     </div>
 
                     <div class="form-group">
@@ -377,7 +386,7 @@
                         <!-- NR 33 -->
                         <table class="tbl-nr33">
                             <tr>
-                                <td rowspan="3" class="lbl-nr">NR 33</td>
+                                <td rowspan="4" class="lbl-nr">NR 33</td>
                                 <td rowspan="3" class="desc-nr">Autorização a Trabalhar em Espaço Confinado</td>
                                 <td colspan="2" class="atrib-hdr">Atribuição</td>
                             </tr>
@@ -388,6 +397,10 @@
                             <tr>
                                 <td class="atrib-row">Supervisor Entrad</td>
                                 <td class="atrib-val card-nr33-supervisor">NÃO</td>
+                            </tr>
+                            <tr>
+                                <td class="val-lbl">Validade:</td>
+                                <td colspan="2" class="val-date card-nr33-validade">27/05/2028</td>
                             </tr>
                         </table>
 
@@ -504,6 +517,7 @@
                                 <th>Nome</th>
                                 <th>Função</th>
                                 <th>NR10 Val.</th>
+                                <th>NR33 Val.</th>
                                 <th>NR35 Val.</th>
                                 <th>Ações</th>
                             </tr>

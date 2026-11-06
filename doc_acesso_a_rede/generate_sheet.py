@@ -25,6 +25,7 @@ def create_csv_and_xlsx():
         "NR33 Aut. Espaço Confinado",
         "NR33 Vigia",
         "NR33 Supervisor Entrada",
+        "NR33 Validade",
         "NR35 Trabalho Altura",
         "NR35 Validade"
     ]

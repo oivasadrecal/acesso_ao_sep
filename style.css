@@ -910,7 +910,7 @@ body {
 
 .tbl-nr1112 td, .tbl-nr33 td, .tbl-nr35 td {
     border: 1px solid #000000 !important;
-    padding: 2px 4px;
+    padding: 1.5px 4px;
 }
 
 .lbl-nr {
@@ -1005,7 +1005,7 @@ body {
 }
 
 .sig-image {
-    height: 18px;
+    height: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1134,9 +1134,180 @@ body {
     background-color: #f8fafc;
 }
 
-/* MODOS DE EXIBIÇÃO DE IMPRESSÃO (POCKET, PVC LADO A LADO) */
+/* MODOS DE EXIBIÇÃO DE IMPRESSÃO (POCKET, POCKET 7x5, PVC LADO A LADO) */
 [data-print-mode="pvc"] .fold-line-divider {
     display: none;
+}
+
+/* Modelo Dobrável 7cm x 5cm (Tela e Impressão) */
+[data-print-mode="pocket-7x5"] .sep-card-side,
+[data-print-mode="pocket-7x5"] .card-front {
+    width: 7cm;
+    height: 5cm;
+}
+
+[data-print-mode="pocket-7x5"] .fold-line-divider {
+    width: 7cm;
+    margin: 6px 0;
+}
+
+[data-print-mode="pocket-7x5"] .fold-label {
+    font-size: 0.48rem;
+    padding: 0 4px;
+}
+
+[data-print-mode="pocket-7x5"] .card-header {
+    padding: 1px 3px;
+}
+
+[data-print-mode="pocket-7x5"] .logo-img {
+    height: 16px;
+}
+
+[data-print-mode="pocket-7x5"] .unidade {
+    font-size: 0.40rem;
+}
+
+[data-print-mode="pocket-7x5"] .header-main-title {
+    font-size: 0.48rem;
+}
+
+[data-print-mode="pocket-7x5"] .header-sub-title {
+    font-size: 0.38rem;
+    padding: 0;
+}
+
+[data-print-mode="pocket-7x5"] .card-front-body {
+    padding: 1px 3px;
+}
+
+[data-print-mode="pocket-7x5"] .top-info-grid {
+    font-size: 0.40rem;
+}
+
+[data-print-mode="pocket-7x5"] .info-cell {
+    padding: 1px 2px;
+}
+
+[data-print-mode="pocket-7x5"] .cell-data-emissao {
+    font-size: 0.39rem;
+}
+
+[data-print-mode="pocket-7x5"] .tabela-nr10-oficial {
+    font-size: 0.38rem;
+}
+
+[data-print-mode="pocket-7x5"] .th-abrangencia,
+[data-print-mode="pocket-7x5"] .th-sub {
+    font-size: 0.40rem;
+}
+
+[data-print-mode="pocket-7x5"] .sub-hdr-desc th {
+    font-size: 0.33rem;
+}
+
+[data-print-mode="pocket-7x5"] .abrang-desc {
+    font-size: 0.38rem;
+    padding-left: 2px !important;
+}
+
+[data-print-mode="pocket-7x5"] .abrang-desc .num {
+    font-size: 0.36rem;
+    padding: 0 1px;
+}
+
+[data-print-mode="pocket-7x5"] .v-header,
+[data-print-mode="pocket-7x5"] .v-header span,
+[data-print-mode="pocket-7x5"] .v-header-empty {
+    width: 9px;
+    font-size: 0.35rem;
+}
+
+[data-print-mode="pocket-7x5"] .tabela-nr10-oficial td.marcado {
+    font-size: 0.50rem;
+}
+
+[data-print-mode="pocket-7x5"] .card-warning-footer {
+    font-size: 0.35rem;
+    padding: 0;
+}
+
+[data-print-mode="pocket-7x5"] .card-validade-row {
+    padding: 1px 4px;
+    font-size: 0.46rem;
+}
+
+[data-print-mode="pocket-7x5"] .card-validade-row .val {
+    font-size: 0.50rem;
+}
+
+[data-print-mode="pocket-7x5"] .card-back-content {
+    padding: 2px 4px;
+    font-size: 0.40rem;
+}
+
+[data-print-mode="pocket-7x5"] .tbl-nr1112,
+[data-print-mode="pocket-7x5"] .tbl-nr33,
+[data-print-mode="pocket-7x5"] .tbl-nr35 {
+    margin-bottom: 1px;
+}
+
+[data-print-mode="pocket-7x5"] .tbl-nr1112 td,
+[data-print-mode="pocket-7x5"] .tbl-nr33 td,
+[data-print-mode="pocket-7x5"] .tbl-nr35 td {
+    padding: 1px 2px;
+}
+
+[data-print-mode="pocket-7x5"] .lbl-nr {
+    width: 34px;
+    font-size: 0.42rem;
+}
+
+[data-print-mode="pocket-7x5"] .val-nr,
+[data-print-mode="pocket-7x5"] .desc-nr {
+    font-size: 0.39rem;
+}
+
+[data-print-mode="pocket-7x5"] .atrib-hdr,
+[data-print-mode="pocket-7x5"] .atrib-row,
+[data-print-mode="pocket-7x5"] .val-lbl,
+[data-print-mode="pocket-7x5"] .val-date {
+    font-size: 0.38rem;
+}
+
+[data-print-mode="pocket-7x5"] .atrib-row {
+    width: 52px;
+}
+
+[data-print-mode="pocket-7x5"] .atrib-val {
+    width: 26px;
+    font-size: 0.39rem;
+}
+
+[data-print-mode="pocket-7x5"] .val-nr35 {
+    width: 36px;
+    font-size: 0.39rem;
+}
+
+[data-print-mode="pocket-7x5"] .card-obs-box {
+    padding: 1.5px 3px;
+    font-size: 0.37rem;
+    line-height: 1.15;
+    margin-bottom: 1px;
+}
+
+[data-print-mode="pocket-7x5"] .card-validity-notice {
+    font-size: 0.36rem;
+    padding: 0.5px 0;
+    margin-bottom: 1px;
+}
+
+[data-print-mode="pocket-7x5"] .sig-image {
+    height: 10px;
+}
+
+[data-print-mode="pocket-7x5"] .sig-box span {
+    font-size: 0.36rem;
 }
 
 /* RESPONSIVIDADE (Mobile & Tablet) */
@@ -1355,6 +1526,10 @@ body {
         width: calc(20cm + 12px) !important;
     }
 
+    [data-print-mode="pocket-7x5"] .printable-card-wrapper {
+        width: 7cm !important;
+    }
+
     .sep-card-side {
         width: 10cm !important;
         height: 6cm !important;
@@ -1363,6 +1538,12 @@ body {
         page-break-inside: avoid !important;
         background-color: #ffffff !important;
         margin: 0 auto !important;
+    }
+
+    [data-print-mode="pocket-7x5"] .sep-card-side,
+    [data-print-mode="pocket-7x5"] .card-front {
+        width: 7cm !important;
+        height: 5cm !important;
     }
 
     /* Cabeçalhos do cartão impresso: fundo branco normal e linhas pretas nítidas */
@@ -1409,5 +1590,9 @@ body {
     .fold-line-divider {
         border-top-color: #000000 !important;
         width: 10cm !important;
+    }
+
+    [data-print-mode="pocket-7x5"] .fold-line-divider {
+        width: 7cm !important;
     }
 }

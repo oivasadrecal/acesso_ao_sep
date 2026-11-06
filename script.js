@@ -10,6 +10,7 @@ const defaultData = {
     nr33Autorizacao: "SIM",
     nr33Vigia: "NÃO",
     nr33Supervisor: "NÃO",
+    nr33Validade: "2028-05-27",
     nr35Autorizado: "SIM",
     nr35Validade: "2028-05-27",
     observacoes: "Capacitado a realizar atividades de emergência Rede Aérea. E Manobras de rede aérea de MT. Reparo de rede de BT/MT. Leitura de Medidores.",
@@ -94,6 +95,7 @@ function createDefaultRecord(matricula, nome) {
         nr33Autorizacao: "SIM",
         nr33Vigia: "NÃO",
         nr33Supervisor: "NÃO",
+        nr33Validade: "2028-05-27",
         nr35Autorizado: "SIM",
         nr35Validade: "2028-05-27"
     };
@@ -209,7 +211,7 @@ function renderExcelHistoryTable() {
 
     if (excelHistory.length === 0) {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td colspan="7" style="text-align: center; color: #64748b; padding: 14px;">Nenhum colaborador cadastrado ainda. Preencha o formulário acima ou importe uma planilha.</td>`;
+        tr.innerHTML = `<td colspan="8" style="text-align: center; color: #64748b; padding: 14px;">Nenhum colaborador cadastrado ainda. Preencha o formulário acima ou importe uma planilha.</td>`;
         tbody.appendChild(tr);
         return;
     }
@@ -222,6 +224,7 @@ function renderExcelHistoryTable() {
             <td>${record.nome}</td>
             <td>${record.funcao}</td>
             <td>${formatDateDisplay(record.validadeCartao)}</td>
+            <td>${formatDateDisplay(record.nr33Validade)}</td>
             <td>${formatDateDisplay(record.nr35Validade)}</td>
             <td style="white-space: nowrap;">
                 <button type="button" class="btn-row-load" data-matr="${record.matricula}" title="Carregar no formulário" style="border: none; background: #e0f2fe; color: #0369a1; padding: 3px 7px; border-radius: 4px; cursor: pointer; margin-right: 4px;">✏️</button>
@@ -324,8 +327,9 @@ function parseRowsToRecords(rows) {
         nr33Autorizacao: 9,
         nr33Vigia: 10,
         nr33Supervisor: 11,
-        nr35Autorizado: 12,
-        nr35Validade: 13
+        nr33Validade: 12,
+        nr35Autorizado: 13,
+        nr35Validade: 14
     };
 
     if (hasHeader) {
@@ -341,6 +345,7 @@ function parseRowsToRecords(rows) {
         const nr33AutIdx = firstRow.findIndex(h => h.includes("33") && (h.includes("aut") || h.includes("espa")));
         const nr33VigIdx = firstRow.findIndex(h => h.includes("vigia"));
         const nr33SupIdx = firstRow.findIndex(h => h.includes("superv"));
+        const nr33ValIdx = firstRow.findIndex(h => h.includes("33") && h.includes("val"));
         const nr35AutIdx = firstRow.findIndex(h => h.includes("35") && (h.includes("altura") || h.includes("aut")));
         const nr35ValIdx = firstRow.findIndex(h => h.includes("35") && h.includes("val"));
 
@@ -358,6 +363,7 @@ function parseRowsToRecords(rows) {
                 nr33Autorizacao: nr33AutIdx,
                 nr33Vigia: nr33VigIdx,
                 nr33Supervisor: nr33SupIdx,
+                nr33Validade: nr33ValIdx,
                 nr35Autorizado: nr35AutIdx,
                 nr35Validade: nr35ValIdx
             };
@@ -400,6 +406,7 @@ function parseRowsToRecords(rows) {
             nr33Autorizacao: (getCol(colMap.nr33Autorizacao) || base.nr33Autorizacao).toUpperCase(),
             nr33Vigia: (getCol(colMap.nr33Vigia) || base.nr33Vigia).toUpperCase(),
             nr33Supervisor: (getCol(colMap.nr33Supervisor) || base.nr33Supervisor).toUpperCase(),
+            nr33Validade: normalizeDateInput(getCol(colMap.nr33Validade)) || base.nr33Validade,
             nr35Autorizado: (getCol(colMap.nr35Autorizado) || base.nr35Autorizado).toUpperCase(),
             nr35Validade: normalizeDateInput(getCol(colMap.nr35Validade)) || base.nr35Validade
         });
@@ -600,12 +607,14 @@ function renderExpirationAlerts() {
 
     const expiringRecords = excelHistory.filter(record => {
         const daysNR10 = getDaysUntilExpiration(record.validadeCartao);
+        const daysNR33 = getDaysUntilExpiration(record.nr33Validade);
         const daysNR35 = getDaysUntilExpiration(record.nr35Validade);
         
         const isNR10Alert = daysNR10 !== null && daysNR10 <= 30;
+        const isNR33Alert = daysNR33 !== null && daysNR33 <= 30;
         const isNR35Alert = daysNR35 !== null && daysNR35 <= 30;
         
-        return isNR10Alert || isNR35Alert;
+        return isNR10Alert || isNR33Alert || isNR35Alert;
     });
 
     if (expiringRecords.length === 0) {
@@ -615,9 +624,11 @@ function renderExpirationAlerts() {
 
     expiringRecords.forEach(record => {
         const daysNR10 = getDaysUntilExpiration(record.validadeCartao);
+        const daysNR33 = getDaysUntilExpiration(record.nr33Validade);
         const daysNR35 = getDaysUntilExpiration(record.nr35Validade);
 
         let nr10Text = "";
+        let nr33Text = "";
         let nr35Text = "";
 
         if (daysNR10 !== null && daysNR10 <= 30) {
@@ -627,6 +638,16 @@ function renderExpirationAlerts() {
                 nr10Text = `<span class="alert-tag warning">NR10 Vence Hoje</span>`;
             } else {
                 nr10Text = `<span class="alert-tag warning">NR10 Vence em ${daysNR10} dias</span>`;
+            }
+        }
+
+        if (daysNR33 !== null && daysNR33 <= 30) {
+            if (daysNR33 < 0) {
+                nr33Text = `<span class="alert-tag expired">NR33 Vencida há ${Math.abs(daysNR33)} dias</span>`;
+            } else if (daysNR33 === 0) {
+                nr33Text = `<span class="alert-tag warning">NR33 Vence Hoje</span>`;
+            } else {
+                nr33Text = `<span class="alert-tag warning">NR33 Vence em ${daysNR33} dias</span>`;
             }
         }
 
@@ -648,6 +669,7 @@ function renderExpirationAlerts() {
             </div>
             <div class="alert-tags-container">
                 ${nr10Text}
+                ${nr33Text}
                 ${nr35Text}
             </div>
         `;
@@ -659,6 +681,11 @@ function renderExpirationAlerts() {
 document.addEventListener("DOMContentLoaded", () => {
     if (document.getElementById("input-nome")) {
         populateFormFields();
+    } else {
+        const printSelect = document.getElementById("select-print-mode");
+        if (printSelect && currentData.modeloImpressao) {
+            printSelect.value = currentData.modeloImpressao;
+        }
     }
     updateCardPreview();
     renderExcelHistoryTable();
@@ -672,7 +699,17 @@ document.addEventListener("DOMContentLoaded", () => {
 function populateFormFields() {
     const setVal = (id, val) => {
         const el = document.getElementById(id);
-        if (el) el.value = val || "";
+        if (!el) return;
+        if (el.tagName === "SELECT" && val) {
+            const exists = Array.from(el.options).some(opt => opt.value === val);
+            if (!exists) {
+                const newOpt = document.createElement("option");
+                newOpt.value = val;
+                newOpt.textContent = val;
+                el.appendChild(newOpt);
+            }
+        }
+        el.value = val || "";
     };
 
     setVal("input-nome", currentData.nome);
@@ -680,11 +717,19 @@ function populateFormFields() {
     setVal("input-matricula", currentData.matricula);
     setVal("input-data-emissao", currentData.dataEmissao);
     setVal("input-unidade", currentData.unidade);
+    const normalizeOp = (v) => {
+        const up = String(v || "CESTO AÉREO").trim().toUpperCase();
+        if (up === "CESTO AÉREO MOTOPODA") return "CESTO AÉREO / MOTOPODA";
+        if (up === "CESTO AÉREO MOTOPODA MOTOSERRA") return "CESTO AÉREO / MOTOPODA / MOTOSERRA";
+        return up;
+    };
+    currentData.autorizadoOperar = normalizeOp(currentData.autorizadoOperar);
     setVal("input-validade-cartao", currentData.validadeCartao);
     setVal("input-autorizado-operar", currentData.autorizadoOperar);
     setVal("input-nr33-autorizacao", currentData.nr33Autorizacao || "NÃO");
     setVal("input-nr33-vigia", currentData.nr33Vigia || "NÃO");
     setVal("input-nr33-supervisor", currentData.nr33Supervisor || "NÃO");
+    setVal("input-nr33-validade", currentData.nr33Validade);
     setVal("input-nr35-autorizado", currentData.nr35Autorizado || "NÃO");
     setVal("input-nr35-validade", currentData.nr35Validade);
     setVal("input-observacoes", currentData.observacoes);
@@ -725,6 +770,7 @@ function updateCardPreview() {
         currentData.nr33Autorizacao = getElVal("input-nr33-autorizacao", "NÃO");
         currentData.nr33Vigia = getElVal("input-nr33-vigia", "NÃO");
         currentData.nr33Supervisor = getElVal("input-nr33-supervisor", "NÃO");
+        currentData.nr33Validade = getElVal("input-nr33-validade");
         currentData.nr35Autorizado = getElVal("input-nr35-autorizado", "NÃO");
         currentData.nr35Validade = getElVal("input-nr35-validade");
         currentData.observacoes = getElVal("input-observacoes");
@@ -785,7 +831,7 @@ function updateCardPreview() {
     }
 
     // NR 11/12
-    setAllText("card-autorizado-operar", currentData.autorizadoOperar || "---");
+    setAllText("card-autorizado-operar", (currentData.autorizadoOperar || "---").toUpperCase());
 
     // NR 33
     document.querySelectorAll("#card-nr33-autorizacao, .card-nr33-autorizacao").forEach(el => {
@@ -803,6 +849,8 @@ function updateCardPreview() {
         el.className = `atrib-val card-nr33-supervisor ${currentData.nr33Supervisor === 'SIM' ? 'val-sim' : 'val-nao'}`;
     });
 
+    setAllText("card-nr33-validade", formatDateDisplay(currentData.nr33Validade));
+
     // NR 35
     document.querySelectorAll("#card-nr35-autorizado, .card-nr35-autorizado").forEach(el => {
         el.textContent = currentData.nr35Autorizado;
@@ -819,7 +867,28 @@ function updateCardPreview() {
 
     // Ajustar classe de modo de impressão no container wrapper
     const printWrapper = document.getElementById("print-wrapper") || document.body;
-    printWrapper.setAttribute("data-print-mode", currentData.modeloImpressao || "pocket");
+    const printMode = currentData.modeloImpressao || "pocket";
+    printWrapper.setAttribute("data-print-mode", printMode);
+
+    // Atualizar rótulos de dimensão conforme o modelo selecionado (10x6cm ou 7x5cm)
+    const is7x5 = printMode === "pocket-7x5";
+    document.querySelectorAll(".fold-label").forEach(el => {
+        el.textContent = is7x5
+            ? "✂️ DOBRE AQUI (LINHA CENTRAL DO CARTÃO 7x5cm) ✂️"
+            : "✂️ DOBRE AQUI (LINHA CENTRAL DO CARTÃO 10x6cm) ✂️";
+    });
+    const previewTitleSpan = document.querySelector(".preview-title span:first-child");
+    if (previewTitleSpan) {
+        previewTitleSpan.textContent = is7x5
+            ? "Pré-visualização do Cartão Modelo Dobrável (7 cm x 5 cm)"
+            : "Pré-visualização do Cartão Modelo Dobrável (10 cm x 6 cm)";
+    }
+    const btnPrintAdmin = document.getElementById("btn-print");
+    if (btnPrintAdmin) {
+        btnPrintAdmin.innerHTML = is7x5
+            ? "<span>🖨️</span> Imprimir Cartão (7x5 cm)"
+            : "<span>🖨️</span> Imprimir Cartão (10x6 cm)";
+    }
 
     // Verificar Alerta de Reciclagem (30 dias antes do vencimento)
     checkReciclagemAlert();
@@ -863,12 +932,14 @@ function checkReciclagemAlert() {
     if (!alertBox) return;
 
     const daysNR10 = getDaysUntilExpiration(currentData.validadeCartao);
+    const daysNR33 = getDaysUntilExpiration(currentData.nr33Validade);
     const daysNR35 = getDaysUntilExpiration(currentData.nr35Validade);
 
     const isNR10Alert = daysNR10 !== null && daysNR10 <= 30;
+    const isNR33Alert = daysNR33 !== null && daysNR33 <= 30;
     const isNR35Alert = daysNR35 !== null && daysNR35 <= 30;
 
-    if (isNR10Alert || isNR35Alert) {
+    if (isNR10Alert || isNR33Alert || isNR35Alert) {
         const nome = currentData.nome || "Não informado";
         const matricula = currentData.matricula || "---";
 
@@ -886,6 +957,10 @@ function checkReciclagemAlert() {
         if (isNR10Alert) {
             nrsVencendo.push("NR 10");
             minDays = Math.min(minDays, daysNR10);
+        }
+        if (isNR33Alert) {
+            nrsVencendo.push("NR 33");
+            minDays = Math.min(minDays, daysNR33);
         }
         if (isNR35Alert) {
             nrsVencendo.push("NR 35");
@@ -920,7 +995,7 @@ function checkReciclagemAlert() {
 // Exportar Planilha Excel (.xlsx) usando SheetJS ou Gerador de Blob
 function exportToXLSX() {
     const headers = [
-        ["Data/Hora Registro", "Matrícula", "Nome Completo", "Função", "Unidade / Gerência", "Data Emissão", "Validade Cartão (NR10)", "NR10 Abrangências Marcadas", "NR11/12 Autorizado", "NR33 Aut. Espaço Confinado", "NR33 Vigia", "NR33 Supervisor Entrada", "NR35 Trabalho Altura", "NR35 Validade"]
+        ["Data/Hora Registro", "Matrícula", "Nome Completo", "Função", "Unidade / Gerência", "Data Emissão", "Validade Cartão (NR10)", "NR10 Abrangências Marcadas", "NR11/12 Autorizado", "NR33 Aut. Espaço Confinado", "NR33 Vigia", "NR33 Supervisor Entrada", "NR33 Validade", "NR35 Trabalho Altura", "NR35 Validade"]
     ];
 
     const dataRows = excelHistory.map(item => [
@@ -936,6 +1011,7 @@ function exportToXLSX() {
         item.nr33Autorizacao || currentData.nr33Autorizacao || "NÃO",
         item.nr33Vigia || currentData.nr33Vigia || "NÃO",
         item.nr33Supervisor || currentData.nr33Supervisor || "NÃO",
+        formatDateDisplay(item.nr33Validade || currentData.nr33Validade),
         item.nr35Autorizado || currentData.nr35Autorizado || "NÃO",
         formatDateDisplay(item.nr35Validade || currentData.nr35Validade)
     ]);
@@ -956,7 +1032,7 @@ function exportToXLSX() {
 // Exportar Planilha (.csv) com codificação UTF-8 BOM
 function exportToCSV() {
     const headers = [
-        "Data/Hora Registro", "Matrícula", "Nome Completo", "Função", "Unidade / Gerência", "Data Emissão", "Validade Cartão (NR10)", "NR10 Abrangências Marcadas", "NR11/12 Autorizado", "NR33 Aut. Espaço Confinado", "NR33 Vigia", "NR33 Supervisor Entrada", "NR35 Trabalho Altura", "NR35 Validade"
+        "Data/Hora Registro", "Matrícula", "Nome Completo", "Função", "Unidade / Gerência", "Data Emissão", "Validade Cartão (NR10)", "NR10 Abrangências Marcadas", "NR11/12 Autorizado", "NR33 Aut. Espaço Confinado", "NR33 Vigia", "NR33 Supervisor Entrada", "NR33 Validade", "NR35 Trabalho Altura", "NR35 Validade"
     ];
 
     const rows = excelHistory.map(item => [
@@ -972,6 +1048,7 @@ function exportToCSV() {
         `"${item.nr33Autorizacao || currentData.nr33Autorizacao || 'NÃO'}"`,
         `"${item.nr33Vigia || currentData.nr33Vigia || 'NÃO'}"`,
         `"${item.nr33Supervisor || currentData.nr33Supervisor || 'NÃO'}"`,
+        `"${formatDateDisplay(item.nr33Validade || currentData.nr33Validade)}"`,
         `"${item.nr35Autorizado || currentData.nr35Autorizado || 'SIM'}"`,
         `"${formatDateDisplay(item.nr35Validade || currentData.nr35Validade)}"`
     ]);
@@ -990,17 +1067,51 @@ function exportToCSV() {
 // Configurar ouvintes de eventos
 function setupEventListeners() {
     // Atualizar cartão ao alterar qualquer input do formulário
+    const syncCurrentToRegisteredCollaborator = () => {
+        const matr = String(currentData.matricula || "").trim();
+        if (!matr || matr === "---") return;
+        const idx = excelHistory.findIndex(item => String(item.matricula || "").trim() === matr);
+        if (idx !== -1) {
+            excelHistory[idx] = {
+                ...excelHistory[idx],
+                nome: currentData.nome || excelHistory[idx].nome,
+                funcao: currentData.funcao || excelHistory[idx].funcao,
+                unidade: currentData.unidade || excelHistory[idx].unidade,
+                dataEmissao: currentData.dataEmissao || excelHistory[idx].dataEmissao,
+                validadeCartao: currentData.validadeCartao || excelHistory[idx].validadeCartao,
+                nr10Summary: getNR10Summary(),
+                nr10Matrix: JSON.parse(JSON.stringify(currentData.nr10Matrix)),
+                autorizadoOperar: currentData.autorizadoOperar || "CESTO AÉREO",
+                nr33Autorizacao: currentData.nr33Autorizacao || "NÃO",
+                nr33Vigia: currentData.nr33Vigia || "NÃO",
+                nr33Supervisor: currentData.nr33Supervisor || "NÃO",
+                nr33Validade: currentData.nr33Validade || "---",
+                nr35Autorizado: currentData.nr35Autorizado || "NÃO",
+                nr35Validade: currentData.nr35Validade || "---",
+                observacoes: currentData.observacoes || "",
+                responsavelTecnico: currentData.responsavelTecnico || ""
+            };
+            saveExcelHistory();
+        }
+    };
+
     const inputs = document.querySelectorAll(".admin-panel input, .admin-panel select, .admin-panel textarea");
     inputs.forEach(input => {
         input.addEventListener("input", () => {
             currentData.statusValidacao = "PENDENTE";
             updateCardPreview();
             saveData();
+            if (input.id !== "input-matricula") {
+                syncCurrentToRegisteredCollaborator();
+            }
         });
         input.addEventListener("change", () => {
             currentData.statusValidacao = "PENDENTE";
             updateCardPreview();
             saveData();
+            if (input.id !== "input-matricula") {
+                syncCurrentToRegisteredCollaborator();
+            }
         });
     });
 
@@ -1029,6 +1140,7 @@ function setupEventListeners() {
                 currentData.nr33Autorizacao = existingRecord.nr33Autorizacao || currentData.nr33Autorizacao;
                 currentData.nr33Vigia = existingRecord.nr33Vigia || currentData.nr33Vigia;
                 currentData.nr33Supervisor = existingRecord.nr33Supervisor || currentData.nr33Supervisor;
+                currentData.nr33Validade = existingRecord.nr33Validade || currentData.nr33Validade;
                 currentData.nr35Autorizado = existingRecord.nr35Autorizado || currentData.nr35Autorizado;
                 currentData.nr35Validade = existingRecord.nr35Validade || currentData.nr35Validade;
                 if (existingRecord.nr10Matrix) {
@@ -1077,6 +1189,7 @@ function setupEventListeners() {
                 nr33Autorizacao: currentData.nr33Autorizacao || "NÃO",
                 nr33Vigia: currentData.nr33Vigia || "NÃO",
                 nr33Supervisor: currentData.nr33Supervisor || "NÃO",
+                nr33Validade: currentData.nr33Validade || "---",
                 nr35Autorizado: currentData.nr35Autorizado || "NÃO",
                 nr35Validade: currentData.nr35Validade || "---"
             };
@@ -1249,6 +1362,7 @@ function setupEventListeners() {
             currentData.nr33Autorizacao = record.nr33Autorizacao || currentData.nr33Autorizacao;
             currentData.nr33Vigia = record.nr33Vigia || currentData.nr33Vigia;
             currentData.nr33Supervisor = record.nr33Supervisor || currentData.nr33Supervisor;
+            currentData.nr33Validade = record.nr33Validade || currentData.nr33Validade;
             currentData.nr35Autorizado = record.nr35Autorizado || currentData.nr35Autorizado;
             currentData.nr35Validade = record.nr35Validade || currentData.nr35Validade;
             
