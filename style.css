@@ -1134,15 +1134,34 @@ body {
     background-color: #f8fafc;
 }
 
-/* MODOS DE EXIBIÇÃO DE IMPRESSÃO (POCKET, POCKET 7x5, PVC LADO A LADO) */
-[data-print-mode="pvc"] .fold-line-divider {
+/* MODOS DE EXIBIÇÃO DE IMPRESSÃO (POCKET, POCKET 7x5, PVC LADO A LADO 10x6 e 7,5x5) */
+[data-print-mode="pvc"] .fold-line-divider,
+[data-print-mode="pvc-75x5"] .fold-line-divider {
     display: none;
 }
 
-/* Modelo Dobrável 7cm x 5cm (Tela e Impressão) */
+[data-print-mode="pvc"] .printable-card-wrapper {
+    display: grid;
+    grid-template-columns: 10cm 10cm;
+    gap: 10px;
+}
+
+[data-print-mode="pvc-75x5"] .printable-card-wrapper {
+    display: grid;
+    grid-template-columns: 7.5cm 7.5cm;
+    gap: 6px;
+}
+
+/* Modelo Dobrável 7cm x 5cm e Lado a Lado 7,5cm x 5cm (Tela e Impressão) */
 [data-print-mode="pocket-7x5"] .sep-card-side,
 [data-print-mode="pocket-7x5"] .card-front {
     width: 7cm;
+    height: 5cm;
+}
+
+[data-print-mode="pvc-75x5"] .sep-card-side,
+[data-print-mode="pvc-75x5"] .card-front {
+    width: 7.5cm;
     height: 5cm;
 }
 
@@ -1156,157 +1175,200 @@ body {
     padding: 0 4px;
 }
 
-[data-print-mode="pocket-7x5"] .card-header {
+[data-print-mode="pocket-7x5"] .card-header,
+[data-print-mode="pvc-75x5"] .card-header {
     padding: 1px 3px;
 }
 
-[data-print-mode="pocket-7x5"] .logo-img {
+[data-print-mode="pocket-7x5"] .logo-img,
+[data-print-mode="pvc-75x5"] .logo-img {
     height: 16px;
 }
 
-[data-print-mode="pocket-7x5"] .unidade {
+[data-print-mode="pocket-7x5"] .unidade,
+[data-print-mode="pvc-75x5"] .unidade {
     font-size: 0.40rem;
 }
 
-[data-print-mode="pocket-7x5"] .header-main-title {
+[data-print-mode="pocket-7x5"] .header-main-title,
+[data-print-mode="pvc-75x5"] .header-main-title {
     font-size: 0.48rem;
 }
 
-[data-print-mode="pocket-7x5"] .header-sub-title {
+[data-print-mode="pocket-7x5"] .header-sub-title,
+[data-print-mode="pvc-75x5"] .header-sub-title {
     font-size: 0.38rem;
     padding: 0;
 }
 
-[data-print-mode="pocket-7x5"] .card-front-body {
+[data-print-mode="pocket-7x5"] .card-front-body,
+[data-print-mode="pvc-75x5"] .card-front-body {
     padding: 1px 3px;
 }
 
-[data-print-mode="pocket-7x5"] .top-info-grid {
+[data-print-mode="pocket-7x5"] .top-info-grid,
+[data-print-mode="pvc-75x5"] .top-info-grid {
     font-size: 0.40rem;
 }
 
-[data-print-mode="pocket-7x5"] .info-cell {
+[data-print-mode="pocket-7x5"] .info-cell,
+[data-print-mode="pvc-75x5"] .info-cell {
     padding: 1px 2px;
 }
 
-[data-print-mode="pocket-7x5"] .cell-data-emissao {
+[data-print-mode="pocket-7x5"] .cell-data-emissao,
+[data-print-mode="pvc-75x5"] .cell-data-emissao {
     font-size: 0.39rem;
 }
 
-[data-print-mode="pocket-7x5"] .tabela-nr10-oficial {
+[data-print-mode="pocket-7x5"] .tabela-nr10-oficial,
+[data-print-mode="pvc-75x5"] .tabela-nr10-oficial {
     font-size: 0.38rem;
 }
 
 [data-print-mode="pocket-7x5"] .th-abrangencia,
-[data-print-mode="pocket-7x5"] .th-sub {
+[data-print-mode="pocket-7x5"] .th-sub,
+[data-print-mode="pvc-75x5"] .th-abrangencia,
+[data-print-mode="pvc-75x5"] .th-sub {
     font-size: 0.40rem;
 }
 
-[data-print-mode="pocket-7x5"] .sub-hdr-desc th {
+[data-print-mode="pocket-7x5"] .sub-hdr-desc th,
+[data-print-mode="pvc-75x5"] .sub-hdr-desc th {
     font-size: 0.33rem;
 }
 
-[data-print-mode="pocket-7x5"] .abrang-desc {
+[data-print-mode="pocket-7x5"] .abrang-desc,
+[data-print-mode="pvc-75x5"] .abrang-desc {
     font-size: 0.38rem;
     padding-left: 2px !important;
 }
 
-[data-print-mode="pocket-7x5"] .abrang-desc .num {
+[data-print-mode="pocket-7x5"] .abrang-desc .num,
+[data-print-mode="pvc-75x5"] .abrang-desc .num {
     font-size: 0.36rem;
     padding: 0 1px;
 }
 
 [data-print-mode="pocket-7x5"] .v-header,
 [data-print-mode="pocket-7x5"] .v-header span,
-[data-print-mode="pocket-7x5"] .v-header-empty {
+[data-print-mode="pocket-7x5"] .v-header-empty,
+[data-print-mode="pvc-75x5"] .v-header,
+[data-print-mode="pvc-75x5"] .v-header span,
+[data-print-mode="pvc-75x5"] .v-header-empty {
     width: 9px;
     font-size: 0.35rem;
 }
 
-[data-print-mode="pocket-7x5"] .tabela-nr10-oficial td.marcado {
+[data-print-mode="pocket-7x5"] .tabela-nr10-oficial td.marcado,
+[data-print-mode="pvc-75x5"] .tabela-nr10-oficial td.marcado {
     font-size: 0.50rem;
 }
 
-[data-print-mode="pocket-7x5"] .card-warning-footer {
+[data-print-mode="pocket-7x5"] .card-warning-footer,
+[data-print-mode="pvc-75x5"] .card-warning-footer {
     font-size: 0.35rem;
     padding: 0;
 }
 
-[data-print-mode="pocket-7x5"] .card-validade-row {
+[data-print-mode="pocket-7x5"] .card-validade-row,
+[data-print-mode="pvc-75x5"] .card-validade-row {
     padding: 1px 4px;
     font-size: 0.46rem;
 }
 
-[data-print-mode="pocket-7x5"] .card-validade-row .val {
+[data-print-mode="pocket-7x5"] .card-validade-row .val,
+[data-print-mode="pvc-75x5"] .card-validade-row .val {
     font-size: 0.50rem;
 }
 
-[data-print-mode="pocket-7x5"] .card-back-content {
+[data-print-mode="pocket-7x5"] .card-back-content,
+[data-print-mode="pvc-75x5"] .card-back-content {
     padding: 2px 4px;
     font-size: 0.40rem;
 }
 
 [data-print-mode="pocket-7x5"] .tbl-nr1112,
 [data-print-mode="pocket-7x5"] .tbl-nr33,
-[data-print-mode="pocket-7x5"] .tbl-nr35 {
+[data-print-mode="pocket-7x5"] .tbl-nr35,
+[data-print-mode="pvc-75x5"] .tbl-nr1112,
+[data-print-mode="pvc-75x5"] .tbl-nr33,
+[data-print-mode="pvc-75x5"] .tbl-nr35 {
     margin-bottom: 1px;
 }
 
 [data-print-mode="pocket-7x5"] .tbl-nr1112 td,
 [data-print-mode="pocket-7x5"] .tbl-nr33 td,
-[data-print-mode="pocket-7x5"] .tbl-nr35 td {
+[data-print-mode="pocket-7x5"] .tbl-nr35 td,
+[data-print-mode="pvc-75x5"] .tbl-nr1112 td,
+[data-print-mode="pvc-75x5"] .tbl-nr33 td,
+[data-print-mode="pvc-75x5"] .tbl-nr35 td {
     padding: 1px 2px;
 }
 
-[data-print-mode="pocket-7x5"] .lbl-nr {
+[data-print-mode="pocket-7x5"] .lbl-nr,
+[data-print-mode="pvc-75x5"] .lbl-nr {
     width: 34px;
     font-size: 0.42rem;
 }
 
 [data-print-mode="pocket-7x5"] .val-nr,
-[data-print-mode="pocket-7x5"] .desc-nr {
+[data-print-mode="pocket-7x5"] .desc-nr,
+[data-print-mode="pvc-75x5"] .val-nr,
+[data-print-mode="pvc-75x5"] .desc-nr {
     font-size: 0.39rem;
 }
 
 [data-print-mode="pocket-7x5"] .atrib-hdr,
 [data-print-mode="pocket-7x5"] .atrib-row,
 [data-print-mode="pocket-7x5"] .val-lbl,
-[data-print-mode="pocket-7x5"] .val-date {
+[data-print-mode="pocket-7x5"] .val-date,
+[data-print-mode="pvc-75x5"] .atrib-hdr,
+[data-print-mode="pvc-75x5"] .atrib-row,
+[data-print-mode="pvc-75x5"] .val-lbl,
+[data-print-mode="pvc-75x5"] .val-date {
     font-size: 0.38rem;
 }
 
-[data-print-mode="pocket-7x5"] .atrib-row {
+[data-print-mode="pocket-7x5"] .atrib-row,
+[data-print-mode="pvc-75x5"] .atrib-row {
     width: 52px;
 }
 
-[data-print-mode="pocket-7x5"] .atrib-val {
+[data-print-mode="pocket-7x5"] .atrib-val,
+[data-print-mode="pvc-75x5"] .atrib-val {
     width: 26px;
     font-size: 0.39rem;
 }
 
-[data-print-mode="pocket-7x5"] .val-nr35 {
+[data-print-mode="pocket-7x5"] .val-nr35,
+[data-print-mode="pvc-75x5"] .val-nr35 {
     width: 36px;
     font-size: 0.39rem;
 }
 
-[data-print-mode="pocket-7x5"] .card-obs-box {
+[data-print-mode="pocket-7x5"] .card-obs-box,
+[data-print-mode="pvc-75x5"] .card-obs-box {
     padding: 1.5px 3px;
     font-size: 0.37rem;
     line-height: 1.15;
     margin-bottom: 1px;
 }
 
-[data-print-mode="pocket-7x5"] .card-validity-notice {
+[data-print-mode="pocket-7x5"] .card-validity-notice,
+[data-print-mode="pvc-75x5"] .card-validity-notice {
     font-size: 0.36rem;
     padding: 0.5px 0;
     margin-bottom: 1px;
 }
 
-[data-print-mode="pocket-7x5"] .sig-image {
+[data-print-mode="pocket-7x5"] .sig-image,
+[data-print-mode="pvc-75x5"] .sig-image {
     height: 10px;
 }
 
-[data-print-mode="pocket-7x5"] .sig-box span {
+[data-print-mode="pocket-7x5"] .sig-box span,
+[data-print-mode="pvc-75x5"] .sig-box span {
     font-size: 0.36rem;
 }
 
@@ -1526,6 +1588,13 @@ body {
         width: calc(20cm + 12px) !important;
     }
 
+    [data-print-mode="pvc-75x5"] .printable-card-wrapper {
+        display: grid !important;
+        grid-template-columns: 7.5cm 7.5cm !important;
+        gap: 6px !important;
+        width: calc(15cm + 6px) !important;
+    }
+
     [data-print-mode="pocket-7x5"] .printable-card-wrapper {
         width: 7cm !important;
     }
@@ -1543,6 +1612,12 @@ body {
     [data-print-mode="pocket-7x5"] .sep-card-side,
     [data-print-mode="pocket-7x5"] .card-front {
         width: 7cm !important;
+        height: 5cm !important;
+    }
+
+    [data-print-mode="pvc-75x5"] .sep-card-side,
+    [data-print-mode="pvc-75x5"] .card-front {
+        width: 7.5cm !important;
         height: 5cm !important;
     }
 
