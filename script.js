@@ -74,6 +74,74 @@ const legacyExampleMatriculas = new Set([
     localStorage.setItem("sep_cleanup_savio_4008663_done", "true");
 })();
 
+// Limpeza única para restaurar as datas da coluna M (M2:M104 - NR33 Validade) que haviam sido ocultadas quando a coluna J estava em branco
+(function runNr33M2M104Fix() {
+    if (localStorage.getItem("sep_fix_nr33_m2_m104_v3") === "true") return;
+    localStorage.removeItem("sep_local_modifications");
+    localStorage.removeItem("sep_excel_history_data");
+    localStorage.setItem("sep_fix_nr33_m2_m104_v3", "true");
+})();
+
+const DEFAULT_GSHEETS_URL = "https://docs.google.com/spreadsheets/d/1x8xvtmJ2wkDjHQW7xx1XUl1beWvJGkM0tFfEIpshxBE/edit?gid=1817662594#gid=1817662594";
+
+function normalizeSimNao(val, fallback = "NÃO") {
+    const s = String(val || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase();
+    if (s === "SIM" || s === "S") return "SIM";
+    if (s === "NAO" || s === "N" || s === "---") return "NÃO";
+    return fallback;
+}
+
+function normalizeAutorizadoOperar(v) {
+    const raw = String(v || "").trim();
+    if (!raw || raw === "---") return "CESTO AÉREO";
+    const norm = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toUpperCase();
+    if (norm.includes("CESTO") && norm.includes("MOTOPODA") && norm.includes("MOTOSERRA")) {
+        return "CESTO AÉREO / MOTOPODA / MOTOSERRA";
+    }
+    if (norm.includes("CESTO") && norm.includes("MOTOPODA")) {
+        return "CESTO AÉREO / MOTOPODA";
+    }
+    if (norm === "CESTO AEREO" || norm === "CESTO" || norm.includes("(CESTO)")) {
+        return "CESTO AÉREO";
+    }
+    return raw.replace(/\s+/g, " ").trim().toUpperCase();
+}
+
+function getLocalModifications() {
+    try {
+        const raw = localStorage.getItem("sep_local_modifications");
+        return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveLocalModification(matricula, record) {
+    const m = String(matricula || "").trim();
+    if (!m || m === "---") return;
+    try {
+        const mods = getLocalModifications();
+        mods[m] = JSON.parse(JSON.stringify(record));
+        localStorage.setItem("sep_local_modifications", JSON.stringify(mods));
+    } catch (e) {
+        console.error("Erro ao salvar modificação local", e);
+    }
+}
+
+function removeLocalModification(matricula) {
+    const m = String(matricula || "").trim();
+    if (!m) return;
+    try {
+        const mods = getLocalModifications();
+        if (mods[m]) {
+            delete mods[m];
+            localStorage.setItem("sep_local_modifications", JSON.stringify(mods));
+        }
+    } catch (e) {
+        console.error("Erro ao remover modificação local", e);
+    }
+}
+
 function createDefaultRecord(matricula, nome) {
     return {
         timestamp: new Date().toLocaleDateString('pt-BR') + " " + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
@@ -92,10 +160,10 @@ function createDefaultRecord(matricula, nome) {
             row4: { bts: false, btc: false, ats: false, atc: false }
         },
         autorizadoOperar: "CESTO AÉREO",
-        nr33Autorizacao: "SIM",
+        nr33Autorizacao: "NÃO",
         nr33Vigia: "NÃO",
         nr33Supervisor: "NÃO",
-        nr33Validade: "2028-05-27",
+        nr33Validade: "",
         nr35Autorizado: "SIM",
         nr35Validade: "2028-05-27"
     };
@@ -136,16 +204,35 @@ function saveData() {
 function loadSavedExcelHistory() {
     let records = [];
     const saved = localStorage.getItem("sep_excel_history_data");
+    const localMods = getLocalModifications();
     if (saved) {
         try {
             let parsed = JSON.parse(saved);
             if (Array.isArray(parsed)) {
+                let normalizedChanged = false;
                 records = parsed.filter(item => {
                     const m = String(item.matricula || "").trim();
                     const isDate = /^\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4}/.test(m) || /\d{1,2}:\d{2}/.test(m);
                     return !legacyExampleMatriculas.has(m) && m && m !== "---" && !isDate;
+                }).map(item => {
+                    const mKey = String(item.matricula || "").trim();
+                    const merged = localMods[mKey] ? { ...item, ...localMods[mKey] } : item;
+                    const rawVal = merged.nr33Validade && merged.nr33Validade !== "---" ? normalizeDateInput(merged.nr33Validade) : "";
+                    const normAut = normalizeSimNao(merged.nr33Autorizacao, rawVal ? "SIM" : "NÃO");
+                    const normVal = normAut === "SIM" ? rawVal : "";
+                    if (item.nr33Autorizacao !== normAut || item.nr33Validade !== normVal || localMods[mKey]) {
+                        normalizedChanged = true;
+                    }
+                    return {
+                        ...merged,
+                        dataEmissao: normalizeDateInput(merged.dataEmissao),
+                        validadeCartao: normalizeDateInput(merged.validadeCartao),
+                        nr33Autorizacao: normAut,
+                        nr33Validade: normVal,
+                        nr35Validade: merged.nr35Validade === "---" ? "" : normalizeDateInput(merged.nr35Validade)
+                    };
                 });
-                if (records.length !== parsed.length) {
+                if (records.length !== parsed.length || normalizedChanged) {
                     localStorage.setItem("sep_excel_history_data", JSON.stringify(records));
                 }
             }
@@ -228,7 +315,7 @@ function renderExcelHistoryTable() {
             <td>${record.nome}</td>
             <td>${record.funcao}</td>
             <td>${formatDateDisplay(record.validadeCartao)}</td>
-            <td>${formatDateDisplay(record.nr33Validade)}</td>
+            <td>${normalizeSimNao(record.nr33Autorizacao, "NÃO") === "NÃO" ? "" : formatDateDisplay(record.nr33Validade)}</td>
             <td>${formatDateDisplay(record.nr35Validade)}</td>
             <td style="white-space: nowrap;">
                 <button type="button" class="btn-row-load" data-matr="${record.matricula}" title="Carregar no formulário" style="border: none; background: #e0f2fe; color: #0369a1; padding: 3px 7px; border-radius: 4px; cursor: pointer; margin-right: 4px;">✏️</button>
@@ -243,6 +330,13 @@ function renderExcelHistoryTable() {
             const matr = btn.getAttribute("data-matr");
             const rec = excelHistory.find(item => String(item.matricula) === String(matr));
             if (rec) {
+                const rawVal33 = rec.nr33Validade && rec.nr33Validade !== "---" ? normalizeDateInput(rec.nr33Validade) : "";
+                rec.nr33Autorizacao = normalizeSimNao(rec.nr33Autorizacao, rawVal33 ? "SIM" : "NÃO");
+                rec.nr33Validade = rec.nr33Autorizacao === "SIM" ? rawVal33 : "";
+                rec.dataEmissao = normalizeDateInput(rec.dataEmissao);
+                rec.validadeCartao = normalizeDateInput(rec.validadeCartao);
+                rec.nr35Validade = rec.nr35Validade === "---" ? "" : normalizeDateInput(rec.nr35Validade);
+
                 Object.assign(currentData, rec);
                 if (rec.nr10Matrix) {
                     currentData.nr10Matrix = JSON.parse(JSON.stringify(rec.nr10Matrix));
@@ -250,6 +344,10 @@ function renderExcelHistoryTable() {
                 populateFormFields();
                 updateCardPreview();
                 saveData();
+                const formPanel = document.getElementById("tab-form");
+                if (formPanel) {
+                    formPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
             }
         });
     });
@@ -259,6 +357,7 @@ function renderExcelHistoryTable() {
             const matr = btn.getAttribute("data-matr");
             if (confirm(`Deseja remover a matrícula ${matr} do banco de dados?`)) {
                 excelHistory = excelHistory.filter(item => String(item.matricula) !== String(matr));
+                removeLocalModification(matr);
                 saveExcelHistory();
             }
         });
@@ -269,6 +368,7 @@ function renderExcelHistoryTable() {
 function normalizeDateInput(dateStr) {
     if (!dateStr) return "";
     const s = String(dateStr).trim();
+    if (!s || s === "---") return "";
     if (s.includes("/")) {
         const parts = s.split("/");
         if (parts.length === 3) {
@@ -364,7 +464,10 @@ function parseRowsToRecords(rows) {
         const val10Idx = firstRow.findIndex(h => h.includes("validade cart") || h.includes("nr10 val") || h.includes("nr 10 val") || h === "validade");
         const nr10Idx = firstRow.findIndex(h => h.includes("abrang") || (h.includes("nr10") && !h.includes("val")));
         const nr11Idx = firstRow.findIndex(h => h.includes("11") || h.includes("12") || h.includes("operar"));
-        const nr33AutIdx = firstRow.findIndex(h => h.includes("33") && (h.includes("aut") || h.includes("espa")));
+        let nr33AutIdx = firstRow.findIndex(h => h.includes("33") && (h.includes("aut") || h.includes("espa")));
+        if (nr33AutIdx === -1) {
+            nr33AutIdx = firstRow.findIndex(h => h.includes("33") && !h.includes("vigia") && !h.includes("superv") && !h.includes("val"));
+        }
         const nr33VigIdx = firstRow.findIndex(h => h.includes("vigia"));
         const nr33SupIdx = firstRow.findIndex(h => h.includes("superv"));
         const nr33ValIdx = firstRow.findIndex(h => h.includes("33") && h.includes("val"));
@@ -435,6 +538,21 @@ function parseRowsToRecords(rows) {
 
         const base = createDefaultRecord(matr, nome || "---");
         const nr10Sum = getCol(colMap.nr10Summary) || base.nr10Summary;
+        const rawNr33Val = normalizeDateInput(getCol(colMap.nr33Validade));
+        const hasValidNr33Date = Boolean(rawNr33Val && rawNr33Val !== "---");
+        const rawNr33AutCol = getCol(colMap.nr33Autorizacao);
+        const nr33Aut = rawNr33AutCol
+            ? normalizeSimNao(rawNr33AutCol, hasValidNr33Date ? "SIM" : "NÃO")
+            : (hasValidNr33Date ? "SIM" : "NÃO");
+        const nr33Val = (nr33Aut === "SIM" && hasValidNr33Date) ? rawNr33Val : "";
+
+        const rawNr35Val = normalizeDateInput(getCol(colMap.nr35Validade));
+        const hasValidNr35Date = Boolean(rawNr35Val && rawNr35Val !== "---");
+        const rawNr35AutCol = getCol(colMap.nr35Autorizado);
+        const nr35Aut = rawNr35AutCol
+            ? normalizeSimNao(rawNr35AutCol, hasValidNr35Date ? "SIM" : "NÃO")
+            : (hasValidNr35Date ? "SIM" : "NÃO");
+        const nr35Val = hasValidNr35Date ? rawNr35Val : "";
 
         records.push({
             timestamp: getCol(colMap.timestamp) || base.timestamp,
@@ -446,13 +564,13 @@ function parseRowsToRecords(rows) {
             validadeCartao: normalizeDateInput(getCol(colMap.validadeCartao)) || base.validadeCartao,
             nr10Summary: nr10Sum,
             nr10Matrix: parseNR10SummaryToMatrix(nr10Sum),
-            autorizadoOperar: getCol(colMap.autorizadoOperar) || base.autorizadoOperar,
-            nr33Autorizacao: (getCol(colMap.nr33Autorizacao) || base.nr33Autorizacao).toUpperCase(),
-            nr33Vigia: (getCol(colMap.nr33Vigia) || base.nr33Vigia).toUpperCase(),
-            nr33Supervisor: (getCol(colMap.nr33Supervisor) || base.nr33Supervisor).toUpperCase(),
-            nr33Validade: normalizeDateInput(getCol(colMap.nr33Validade)) || base.nr33Validade,
-            nr35Autorizado: (getCol(colMap.nr35Autorizado) || base.nr35Autorizado).toUpperCase(),
-            nr35Validade: normalizeDateInput(getCol(colMap.nr35Validade)) || base.nr35Validade
+            autorizadoOperar: normalizeAutorizadoOperar(getCol(colMap.autorizadoOperar) || base.autorizadoOperar),
+            nr33Autorizacao: nr33Aut,
+            nr33Vigia: normalizeSimNao(getCol(colMap.nr33Vigia), "NÃO"),
+            nr33Supervisor: normalizeSimNao(getCol(colMap.nr33Supervisor), "NÃO"),
+            nr33Validade: nr33Val,
+            nr35Autorizado: nr35Aut,
+            nr35Validade: nr35Val
         });
     });
 
@@ -500,17 +618,48 @@ function parseCSVText(csvText) {
 // Mesclar registros importados no histórico atual
 function mergeImportedRecords(newRecords) {
     if (!Array.isArray(newRecords) || newRecords.length === 0) return 0;
+    const localMods = getLocalModifications();
     let count = 0;
     newRecords.forEach(rec => {
-        const idx = excelHistory.findIndex(item => String(item.matricula).trim() === String(rec.matricula).trim());
+        const matrKey = String(rec.matricula).trim();
+        let finalRec = { ...rec };
+
+        // Se houver modificação local salva pelo administrador, preservá-la
+        if (localMods[matrKey]) {
+            finalRec = {
+                ...finalRec,
+                ...localMods[matrKey]
+            };
+        }
+
+        const rawVal33 = finalRec.nr33Validade && finalRec.nr33Validade !== "---" ? normalizeDateInput(finalRec.nr33Validade) : "";
+        finalRec.nr33Autorizacao = normalizeSimNao(finalRec.nr33Autorizacao, rawVal33 ? "SIM" : "NÃO");
+        finalRec.nr33Validade = finalRec.nr33Autorizacao === "SIM" ? rawVal33 : "";
+        finalRec.dataEmissao = normalizeDateInput(finalRec.dataEmissao);
+        finalRec.validadeCartao = normalizeDateInput(finalRec.validadeCartao);
+        finalRec.nr35Validade = finalRec.nr35Validade === "---" ? "" : normalizeDateInput(finalRec.nr35Validade);
+
+        const idx = excelHistory.findIndex(item => String(item.matricula).trim() === matrKey);
         if (idx !== -1) {
-            excelHistory[idx] = rec;
+            excelHistory[idx] = finalRec;
         } else {
-            excelHistory.push(rec);
+            excelHistory.push(finalRec);
         }
         count++;
     });
     saveExcelHistory();
+
+    // Se houver um colaborador carregado no formulário, manter sincronizado com as alterações locais salvas
+    const activeMatr = String(currentData.matricula || "").trim();
+    if (activeMatr && localMods[activeMatr]) {
+        Object.assign(currentData, localMods[activeMatr]);
+        if (document.getElementById("input-nome")) {
+            populateFormFields();
+        }
+        updateCardPreview();
+        saveData();
+    }
+
     return count;
 }
 
@@ -581,7 +730,7 @@ async function syncFromGoogleSheets(rawUrl, silent = false) {
 // Carregar automaticamente CSV do repositório (GitHub Pages) e Google Sheets salvo
 async function loadExternalSpreadsheetsOnInit() {
     const gsheetsInput = document.getElementById("input-gsheets-url");
-    const savedGSheetsUrl = localStorage.getItem("sep_gsheets_url") || "";
+    const savedGSheetsUrl = localStorage.getItem("sep_gsheets_url") || DEFAULT_GSHEETS_URL;
     if (gsheetsInput && savedGSheetsUrl) {
         gsheetsInput.value = savedGSheetsUrl;
     }
@@ -608,7 +757,7 @@ async function loadExternalSpreadsheetsOnInit() {
 
 // Formatar data AAAA-MM-DD para DD/MM/AAAA
 function formatDateDisplay(dateStr) {
-    if (!dateStr) return "";
+    if (!dateStr || dateStr === "---") return "";
     if (dateStr.includes("/")) return dateStr;
     const parts = dateStr.split("-");
     if (parts.length === 3) {
@@ -651,7 +800,7 @@ function renderExpirationAlerts() {
 
     const expiringRecords = excelHistory.filter(record => {
         const daysNR10 = getDaysUntilExpiration(record.validadeCartao);
-        const daysNR33 = getDaysUntilExpiration(record.nr33Validade);
+        const daysNR33 = normalizeSimNao(record.nr33Autorizacao, "NÃO") === "SIM" ? getDaysUntilExpiration(record.nr33Validade) : null;
         const daysNR35 = getDaysUntilExpiration(record.nr35Validade);
         
         const isNR10Alert = daysNR10 !== null && daysNR10 <= 30;
@@ -668,7 +817,7 @@ function renderExpirationAlerts() {
 
     expiringRecords.forEach(record => {
         const daysNR10 = getDaysUntilExpiration(record.validadeCartao);
-        const daysNR33 = getDaysUntilExpiration(record.nr33Validade);
+        const daysNR33 = normalizeSimNao(record.nr33Autorizacao, "NÃO") === "SIM" ? getDaysUntilExpiration(record.nr33Validade) : null;
         const daysNR35 = getDaysUntilExpiration(record.nr35Validade);
 
         let nr10Text = "";
@@ -756,18 +905,17 @@ function populateFormFields() {
         el.value = val || "";
     };
 
+    currentData.dataEmissao = normalizeDateInput(currentData.dataEmissao);
+    currentData.validadeCartao = normalizeDateInput(currentData.validadeCartao);
+    currentData.nr33Validade = normalizeDateInput(currentData.nr33Validade);
+    currentData.nr35Validade = normalizeDateInput(currentData.nr35Validade);
+
     setVal("input-nome", currentData.nome);
     setVal("input-funcao", currentData.funcao);
     setVal("input-matricula", currentData.matricula);
     setVal("input-data-emissao", currentData.dataEmissao);
     setVal("input-unidade", currentData.unidade);
-    const normalizeOp = (v) => {
-        const up = String(v || "CESTO AÉREO").trim().toUpperCase();
-        if (up === "CESTO AÉREO MOTOPODA") return "CESTO AÉREO / MOTOPODA";
-        if (up === "CESTO AÉREO MOTOPODA MOTOSERRA") return "CESTO AÉREO / MOTOPODA / MOTOSERRA";
-        return up;
-    };
-    currentData.autorizadoOperar = normalizeOp(currentData.autorizadoOperar);
+    currentData.autorizadoOperar = normalizeAutorizadoOperar(currentData.autorizadoOperar);
     setVal("input-validade-cartao", currentData.validadeCartao);
     setVal("input-autorizado-operar", currentData.autorizadoOperar);
     setVal("input-nr33-autorizacao", currentData.nr33Autorizacao || "NÃO");
@@ -1017,7 +1165,7 @@ function checkReciclagemAlert() {
     if (!alertBox) return;
 
     const daysNR10 = getDaysUntilExpiration(currentData.validadeCartao);
-    const daysNR33 = getDaysUntilExpiration(currentData.nr33Validade);
+    const daysNR33 = normalizeSimNao(currentData.nr33Autorizacao, "NÃO") === "SIM" ? getDaysUntilExpiration(currentData.nr33Validade) : null;
     const daysNR35 = getDaysUntilExpiration(currentData.nr35Validade);
 
     const isNR10Alert = daysNR10 !== null && daysNR10 <= 30;
@@ -1093,10 +1241,10 @@ function exportToXLSX() {
         formatDateDisplay(item.validadeCartao || currentData.validadeCartao),
         item.nr10Summary,
         item.autorizadoOperar || currentData.autorizadoOperar || "",
-        item.nr33Autorizacao || currentData.nr33Autorizacao || "NÃO",
+        normalizeSimNao(item.nr33Autorizacao, "NÃO"),
         item.nr33Vigia || currentData.nr33Vigia || "NÃO",
         item.nr33Supervisor || currentData.nr33Supervisor || "NÃO",
-        formatDateDisplay(item.nr33Validade || currentData.nr33Validade),
+        normalizeSimNao(item.nr33Autorizacao, "NÃO") === "NÃO" ? "" : formatDateDisplay(item.nr33Validade),
         item.nr35Autorizado || currentData.nr35Autorizado || "NÃO",
         formatDateDisplay(item.nr35Validade || currentData.nr35Validade)
     ]);
@@ -1130,10 +1278,10 @@ function exportToCSV() {
         `"${formatDateDisplay(item.validadeCartao || currentData.validadeCartao)}"`,
         `"${item.nr10Summary.replace(/"/g, '""')}"`,
         `"${(item.autorizadoOperar || currentData.autorizadoOperar || '').replace(/"/g, '""')}"`,
-        `"${item.nr33Autorizacao || currentData.nr33Autorizacao || 'NÃO'}"`,
+        `"${normalizeSimNao(item.nr33Autorizacao, 'NÃO')}"`,
         `"${item.nr33Vigia || currentData.nr33Vigia || 'NÃO'}"`,
         `"${item.nr33Supervisor || currentData.nr33Supervisor || 'NÃO'}"`,
-        `"${formatDateDisplay(item.nr33Validade || currentData.nr33Validade)}"`,
+        `"${normalizeSimNao(item.nr33Autorizacao, 'NÃO') === 'NÃO' ? '' : formatDateDisplay(item.nr33Validade)}"`,
         `"${item.nr35Autorizado || currentData.nr35Autorizado || 'SIM'}"`,
         `"${formatDateDisplay(item.nr35Validade || currentData.nr35Validade)}"`
     ]);
@@ -1157,6 +1305,8 @@ function setupEventListeners() {
         if (!matr || matr === "---") return;
         const idx = excelHistory.findIndex(item => String(item.matricula || "").trim() === matr);
         if (idx !== -1) {
+            const nr33Aut = normalizeSimNao(currentData.nr33Autorizacao, "NÃO");
+            const nr33Val = nr33Aut === "SIM" && currentData.nr33Validade !== "---" ? (currentData.nr33Validade || "") : "";
             excelHistory[idx] = {
                 ...excelHistory[idx],
                 nome: currentData.nome || excelHistory[idx].nome,
@@ -1167,15 +1317,16 @@ function setupEventListeners() {
                 nr10Summary: getNR10Summary(),
                 nr10Matrix: JSON.parse(JSON.stringify(currentData.nr10Matrix)),
                 autorizadoOperar: currentData.autorizadoOperar || "CESTO AÉREO",
-                nr33Autorizacao: currentData.nr33Autorizacao || "NÃO",
+                nr33Autorizacao: nr33Aut,
                 nr33Vigia: currentData.nr33Vigia || "NÃO",
                 nr33Supervisor: currentData.nr33Supervisor || "NÃO",
-                nr33Validade: currentData.nr33Validade || "---",
+                nr33Validade: nr33Val,
                 nr35Autorizado: currentData.nr35Autorizado || "NÃO",
-                nr35Validade: currentData.nr35Validade || "---",
+                nr35Validade: currentData.nr35Validade || "",
                 observacoes: currentData.observacoes || "",
                 responsavelTecnico: currentData.responsavelTecnico || ""
             };
+            saveLocalModification(matr, excelHistory[idx]);
             saveExcelHistory();
         }
     };
@@ -1216,18 +1367,27 @@ function setupEventListeners() {
             // Também carrega dados existentes do histórico se houver
             const existingRecord = excelHistory.find(item => item.matricula === matr);
             if (existingRecord) {
+                const rawVal33 = existingRecord.nr33Validade && existingRecord.nr33Validade !== "---" ? normalizeDateInput(existingRecord.nr33Validade) : "";
+                const nr33Aut = normalizeSimNao(existingRecord.nr33Autorizacao, rawVal33 ? "SIM" : "NÃO");
+                const nr33Val = nr33Aut === "SIM" ? rawVal33 : "";
+                existingRecord.nr33Autorizacao = nr33Aut;
+                existingRecord.nr33Validade = nr33Val;
+                existingRecord.dataEmissao = normalizeDateInput(existingRecord.dataEmissao);
+                existingRecord.validadeCartao = normalizeDateInput(existingRecord.validadeCartao);
+                existingRecord.nr35Validade = existingRecord.nr35Validade === "---" ? "" : normalizeDateInput(existingRecord.nr35Validade);
+
                 currentData.nome = existingRecord.nome;
                 currentData.funcao = existingRecord.funcao;
                 currentData.unidade = existingRecord.unidade || currentData.unidade;
-                currentData.dataEmissao = existingRecord.dataEmissao || currentData.dataEmissao;
-                currentData.validadeCartao = existingRecord.validadeCartao || currentData.validadeCartao;
-                currentData.autorizadoOperar = existingRecord.autorizadoOperar || currentData.autorizadoOperar;
-                currentData.nr33Autorizacao = existingRecord.nr33Autorizacao || currentData.nr33Autorizacao;
+                currentData.dataEmissao = existingRecord.dataEmissao;
+                currentData.validadeCartao = existingRecord.validadeCartao;
+                currentData.autorizadoOperar = normalizeAutorizadoOperar(existingRecord.autorizadoOperar || currentData.autorizadoOperar);
+                currentData.nr33Autorizacao = nr33Aut;
                 currentData.nr33Vigia = existingRecord.nr33Vigia || currentData.nr33Vigia;
                 currentData.nr33Supervisor = existingRecord.nr33Supervisor || currentData.nr33Supervisor;
-                currentData.nr33Validade = existingRecord.nr33Validade || currentData.nr33Validade;
+                currentData.nr33Validade = nr33Val;
                 currentData.nr35Autorizado = existingRecord.nr35Autorizado || currentData.nr35Autorizado;
-                currentData.nr35Validade = existingRecord.nr35Validade || currentData.nr35Validade;
+                currentData.nr35Validade = existingRecord.nr35Validade;
                 currentData.observacoes = existingRecord.observacoes !== undefined ? existingRecord.observacoes : defaultData.observacoes;
                 currentData.responsavelTecnico = existingRecord.responsavelTecnico !== undefined ? existingRecord.responsavelTecnico : defaultData.responsavelTecnico;
                 if (existingRecord.nr10Matrix) {
@@ -1236,6 +1396,7 @@ function setupEventListeners() {
                 populateFormFields();
             }
             updateCardPreview();
+            saveData();
         });
     }
 
@@ -1266,6 +1427,8 @@ function setupEventListeners() {
             currentData.dataValidacao = formattedDate;
 
             // Adicionar ou atualizar registro ao histórico da planilha
+            const nr33Aut = normalizeSimNao(currentData.nr33Autorizacao, "NÃO");
+            const nr33Val = nr33Aut === "SIM" && currentData.nr33Validade !== "---" ? (currentData.nr33Validade || "") : "";
             const newRecord = {
                 timestamp: formattedDate,
                 matricula: currentData.matricula || "---",
@@ -1277,12 +1440,12 @@ function setupEventListeners() {
                 nr10Summary: getNR10Summary(),
                 nr10Matrix: JSON.parse(JSON.stringify(currentData.nr10Matrix)),
                 autorizadoOperar: currentData.autorizadoOperar || "CESTO AÉREO",
-                nr33Autorizacao: currentData.nr33Autorizacao || "NÃO",
+                nr33Autorizacao: nr33Aut,
                 nr33Vigia: currentData.nr33Vigia || "NÃO",
                 nr33Supervisor: currentData.nr33Supervisor || "NÃO",
-                nr33Validade: currentData.nr33Validade || "---",
+                nr33Validade: nr33Val,
                 nr35Autorizado: currentData.nr35Autorizado || "NÃO",
-                nr35Validade: currentData.nr35Validade || "---",
+                nr35Validade: currentData.nr35Validade || "",
                 observacoes: currentData.observacoes || "",
                 responsavelTecnico: currentData.responsavelTecnico || ""
             };
@@ -1293,6 +1456,7 @@ function setupEventListeners() {
             } else {
                 excelHistory.push(newRecord);
             }
+            saveLocalModification(newRecord.matricula, newRecord);
             saveExcelHistory();
 
             // Limpar o formulário para receber o próximo cadastro (mantendo Função, Unidade, Observações e Responsável Técnico)
@@ -1408,6 +1572,7 @@ function setupEventListeners() {
         btnClearHistory.addEventListener("click", () => {
             if (confirm("Deseja realmente apagar todos os colaboradores cadastrados no banco de dados?")) {
                 excelHistory = [];
+                localStorage.removeItem("sep_local_modifications");
                 saveExcelHistory();
                 currentData.nome = "";
                 currentData.matricula = "";
@@ -1483,19 +1648,22 @@ function setupEventListeners() {
         }
 
         if (record) {
+            const rawVal33 = record.nr33Validade && record.nr33Validade !== "---" ? normalizeDateInput(record.nr33Validade) : "";
+            const nr33Aut = normalizeSimNao(record.nr33Autorizacao, rawVal33 ? "SIM" : "NÃO");
+            const nr33Val = nr33Aut === "SIM" ? rawVal33 : "";
             currentData.nome = record.nome;
             currentData.funcao = record.funcao;
             currentData.matricula = record.matricula;
             currentData.unidade = record.unidade || currentData.unidade;
-            currentData.dataEmissao = record.dataEmissao || currentData.dataEmissao;
-            currentData.validadeCartao = record.validadeCartao || currentData.validadeCartao;
-            currentData.autorizadoOperar = record.autorizadoOperar || currentData.autorizadoOperar;
-            currentData.nr33Autorizacao = record.nr33Autorizacao || currentData.nr33Autorizacao;
+            currentData.dataEmissao = normalizeDateInput(record.dataEmissao || currentData.dataEmissao);
+            currentData.validadeCartao = normalizeDateInput(record.validadeCartao || currentData.validadeCartao);
+            currentData.autorizadoOperar = normalizeAutorizadoOperar(record.autorizadoOperar || currentData.autorizadoOperar);
+            currentData.nr33Autorizacao = nr33Aut;
             currentData.nr33Vigia = record.nr33Vigia || currentData.nr33Vigia;
             currentData.nr33Supervisor = record.nr33Supervisor || currentData.nr33Supervisor;
-            currentData.nr33Validade = record.nr33Validade || currentData.nr33Validade;
+            currentData.nr33Validade = nr33Val;
             currentData.nr35Autorizado = record.nr35Autorizado || currentData.nr35Autorizado;
-            currentData.nr35Validade = record.nr35Validade || currentData.nr35Validade;
+            currentData.nr35Validade = record.nr35Validade === "---" ? "" : normalizeDateInput(record.nr35Validade || currentData.nr35Validade);
             currentData.observacoes = record.observacoes !== undefined ? record.observacoes : defaultData.observacoes;
             currentData.responsavelTecnico = record.responsavelTecnico !== undefined ? record.responsavelTecnico : defaultData.responsavelTecnico;
             
